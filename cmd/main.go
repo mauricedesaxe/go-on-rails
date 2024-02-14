@@ -10,7 +10,7 @@ import (
 
 func main() {
 	app := fiber.New()
-	model.InitDB()
+	model.DB = model.InitDB("store.db")
 	app.Get("/", handler.HandleHelloIndex)
 
 	// Create a slice of route registrars
