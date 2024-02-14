@@ -10,7 +10,7 @@ type ResponseHandler func(*fiber.Ctx) error
 // HandleResponse decides whether to handle the response as JSON or as a Templ rendering,
 // based on the "Accept" header of the request.
 func HandleResponse(c *fiber.Ctx, handleJSON ResponseHandler, handleTempl ResponseHandler) error {
-	if c.Get("Accept") == "application/json" {
+	if c.Get("Content-Type") == "application/json" {
 		return handleJSON(c)
 	}
 	return handleTempl(c)
