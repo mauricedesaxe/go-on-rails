@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anthdm/slick"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Posts struct{} // Implements RouteRegistrar and CoreHandler
 
-func (h *Posts) RegisterRoutes(app *slick.Slick) {
+func (h *Posts) RegisterRoutes(app *fiber.App) {
 	app.Get("/posts", h.index)
 	app.Get("/posts/:id", h.show)
 	app.Get("/posts/new", h.new)
@@ -22,40 +22,40 @@ func (h *Posts) RegisterRoutes(app *slick.Slick) {
 }
 
 // GET /posts - index - List all posts
-func (h *Posts) index(c *slick.Context) error {
+func (h *Posts) index(c *fiber.Ctx) error {
 	var rows []model.Post
 	tx := model.DB.Find(&rows)
 	if tx.Error != nil {
-		return c.Render(posts.Error("No posts found"))
+		return RenderTempl(c, posts.Error("No posts found"))
 	}
 
-	return c.Render(posts.Index(rows))
+	return RenderTempl(c, posts.Index(rows))
 }
 
 // GET /posts/:id - show - Show a single post
-func (h *Posts) show(c *slick.Context) error {
-	idStr := c.Param("id")
+func (h *Posts) show(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.Render(posts.Error("Invalid ID format"))
+		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Post not found"))
+		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	return c.Render(posts.Show(res))
+	return RenderTempl(c, posts.Show(res))
 }
 
 // GET /posts/new - new - Show the form to create a new post
-func (h *Posts) new(c *slick.Context) error {
-	return c.Render(posts.New())
+func (h *Posts) new(c *fiber.Ctx) error {
+	return RenderTempl(c, posts.New())
 }
 
 // POST /posts - create - Create a new post
-func (h *Posts) create(c *slick.Context) error {
+func (h *Posts) create(c *fiber.Ctx) error {
 	title := c.FormValue("title")
 	content := c.FormValue("content")
 	author := c.FormValue("author")
@@ -68,41 +68,41 @@ func (h *Posts) create(c *slick.Context) error {
 
 	tx := model.DB.Create(&post)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Failed to create post"))
+		return RenderTempl(c, posts.Error("Failed to create post"))
 	}
 
 	return c.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
 }
 
 // GET /posts/:id/edit - edit - Show the form to edit a post
-func (h *Posts) edit(c *slick.Context) error {
-	idStr := c.Param("id")
+func (h *Posts) edit(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.Render(posts.Error("Invalid ID format"))
+		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Post not found"))
+		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	return c.Render(posts.Edit(res))
+	return RenderTempl(c, posts.Edit(res))
 }
 
 // PUT /posts/:id - update - Update a post
-func (h *Posts) update(c *slick.Context) error {
-	idStr := c.Param("id")
+func (h *Posts) update(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.Render(posts.Error("Invalid ID format"))
+		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Post not found"))
+		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
 	title := c.FormValue("title")
@@ -113,29 +113,29 @@ func (h *Posts) update(c *slick.Context) error {
 	res.Author = author
 	tx = model.DB.Save(&res)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Failed to update post"))
+		return RenderTempl(c, posts.Error("Failed to update post"))
 	}
 
 	return c.Redirect("/posts/"+strconv.Itoa(int(res.ID)), http.StatusFound)
 }
 
 // DELETE /posts/:id - delete - Delete a post
-func (h *Posts) delete(c *slick.Context) error {
-	idStr := c.Param("id")
+func (h *Posts) delete(c *fiber.Ctx) error {
+	idStr := c.Params("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.Render(posts.Error("Invalid ID format"))
+		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Post not found"))
+		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
 	tx = model.DB.Delete(&res)
 	if tx.Error != nil {
-		return c.Render(posts.Error("Failed to delete post"))
+		return RenderTempl(c, posts.Error("Failed to delete post"))
 	}
 
 	return c.Redirect("/posts", http.StatusFound)

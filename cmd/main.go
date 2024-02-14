@@ -5,11 +5,11 @@ import (
 	"goblog/model"
 	"log"
 
-	"github.com/anthdm/slick"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	app := slick.New()
+	app := fiber.New()
 	model.InitDB()
 	app.Get("/", handler.HandleHelloIndex)
 
@@ -23,5 +23,5 @@ func main() {
 		registrar.RegisterRoutes(app)
 	}
 
-	log.Fatal(app.Start())
+	log.Fatal(app.Listen(":3000"))
 }

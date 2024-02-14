@@ -3,9 +3,9 @@ package handler
 import (
 	"goblog/view/hello"
 
-	"github.com/anthdm/slick"
+	"github.com/gofiber/fiber/v2"
 )
 
-func HandleHelloIndex(c *slick.Context) error {
-	return c.Render(hello.Index())
+func HandleHelloIndex(c *fiber.Ctx) error {
+	return RenderTempl(c, hello.Index())
 }
