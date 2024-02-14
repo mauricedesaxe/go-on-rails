@@ -15,4 +15,5 @@ func InitDB() {
 	}
 
 	// Migrate the schema
+	DB.AutoMigrate(&Post{})
 }
