@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"goblog/model"
 	"goblog/view/posts"
 	"net/http"
@@ -106,49 +105,54 @@ func (h *Posts) create(c *fiber.Ctx) error {
 
 // createJSON handles the JSON response for creating a new post.
 func (h *Posts) createJSON(c *fiber.Ctx) error {
-	post, err := h.extractPostFromForm(c)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	var post model.Post
+
+	// Parse the request body into the post model.
+	if err := c.BodyParser(&post); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid JSON format"})
 	}
 
+	// Ensure that the required fields are provided.
+	if post.Title == "" || post.Content == "" || post.Author == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Title, content, and author are required"})
+	}
+
+	// Save the new post.
 	tx := model.DB.Create(&post)
 	if tx.Error != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create post"})
 	}
 
+	// Return the new post.
 	return c.Status(http.StatusCreated).JSON(post)
 }
 
 // createTempl handles the Templ response for creating a new post.
 func (h *Posts) createTempl(c *fiber.Ctx) error {
-	post, err := h.extractPostFromForm(c)
-	if err != nil {
-		return RenderTempl(c, posts.Error(err.Error()))
+	title := c.FormValue("title")
+	content := c.FormValue("content")
+	author := c.FormValue("author")
+
+	// Ensure that the required fields are provided.
+	if title == "" || content == "" || author == "" {
+		return RenderTempl(c, posts.Error("Title, content, and author are required"))
 	}
 
+	// Create a new post.
+	post := model.Post{
+		Title:   title,
+		Content: content,
+		Author:  author,
+	}
+
+	// Save the new post.
 	tx := model.DB.Create(&post)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to create post"))
 	}
 
+	// Redirect to the new post.
 	return c.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
-}
-
-// extractPostFromForm extracts post data from the form values.
-func (h *Posts) extractPostFromForm(c *fiber.Ctx) (model.Post, error) {
-	title := c.FormValue("title")
-	content := c.FormValue("content")
-	author := c.FormValue("author")
-
-	if title == "" || content == "" || author == "" {
-		return model.Post{}, errors.New("missing title, content, or author")
-	}
-
-	return model.Post{
-		Title:   title,
-		Content: content,
-		Author:  author,
-	}, nil
 }
 
 // GET /posts/:id/edit - edit - Show the form to edit a post
@@ -195,67 +199,84 @@ func (h *Posts) update(c *fiber.Ctx) error {
 
 // updateJSON handles the JSON response for updating a post.
 func (h *Posts) updateJSON(c *fiber.Ctx) error {
+	// Parse the post ID from the request.
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID format"})
 	}
 
+	// Find the post to update.
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Post not found"})
 	}
 
-	if err := h.extractAndUpdatePost(c, &res); err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	// Parse the request body into the post model.
+	var body model.Post
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid JSON format"})
 	}
 
+	// Update the post fields if they are provided.
+	if body.Title != "" {
+		res.Title = body.Title
+	}
+	if body.Content != "" {
+		res.Content = body.Content
+	}
+	if body.Author != "" {
+		res.Author = body.Author
+	}
+
+	// Save the updated post.
+	tx = model.DB.Save(&res)
+	if tx.Error != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update post"})
+	}
+
+	// Return the updated post.
 	return c.Status(http.StatusAccepted).JSON(res)
 }
 
 // updateTempl handles the Templ rendering for updating a post.
 func (h *Posts) updateTempl(c *fiber.Ctx) error {
+	// Parse the post ID from the request.
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
+	// Find the post to update.
 	var res model.Post
 	tx := model.DB.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	if err := h.extractAndUpdatePost(c, &res); err != nil {
-		return RenderTempl(c, posts.Error(err.Error()))
-	}
-
-	return c.Redirect("/posts/"+strconv.Itoa(int(res.ID)), http.StatusFound)
-}
-
-// extractAndUpdatePost extracts post data from the form and updates the post.
-func (h *Posts) extractAndUpdatePost(c *fiber.Ctx, post *model.Post) error {
 	title := c.FormValue("title")
 	content := c.FormValue("content")
 	author := c.FormValue("author")
 
 	// Update the post fields if they are provided.
 	if title != "" {
-		post.Title = title
+		res.Title = title
 	}
 	if content != "" {
-		post.Content = content
+		res.Content = content
 	}
 	if author != "" {
-		post.Author = author
+		res.Author = author
 	}
 
-	tx := model.DB.Save(post)
+	// Save the updated post.
+	tx = model.DB.Save(res)
 	if tx.Error != nil {
-		return tx.Error
+		return RenderTempl(c, posts.Error("Failed to update post"))
 	}
 
-	return nil
+	// Redirect to the updated post.
+	return c.Redirect("/posts/"+strconv.Itoa(int(res.ID)), http.StatusFound)
 }
 
 // DELETE /posts/:id - delete - Delete a post
