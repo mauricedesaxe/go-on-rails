@@ -3,7 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"goblog/model"
+	models "goblog/models"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +17,7 @@ import (
 
 func TestPostHandler(t *testing.T) {
 	// Setup
-	model.DB = model.InitDB("store.test.db")
+	models.DB = models.InitDB("store.test.db")
 	defer func() {
 		os.Remove("store.test.db")
 	}()
@@ -55,7 +55,7 @@ func TestPostHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	post := model.Post{}
+	post := models.Post{}
 	err = json.Unmarshal(bodyBytes, &post)
 	if err != nil {
 		t.Fatal(err)
@@ -77,7 +77,7 @@ func TestPostHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	posts := []model.Post{}
+	posts := []models.Post{}
 	err = json.Unmarshal(bodyBytes, &posts)
 	if err != nil {
 		t.Fatal(err)
@@ -100,7 +100,7 @@ func TestPostHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	post = model.Post{}
+	post = models.Post{}
 	err = json.Unmarshal(bodyBytes, &post)
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +123,7 @@ func TestPostHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	post = model.Post{}
+	post = models.Post{}
 	err = json.Unmarshal(bodyBytes, &post)
 	if err != nil {
 		t.Fatal(err)
@@ -155,7 +155,7 @@ func TestPostHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	posts = []model.Post{}
+	posts = []models.Post{}
 	err = json.Unmarshal(bodyBytes, &posts)
 	if err != nil {
 		t.Fatal(err)

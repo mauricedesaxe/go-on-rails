@@ -3,12 +3,12 @@
 package posts
 
 import (
-	"goblog/view/layout"
+	"goblog/views/layout"
 
-    "goblog/model"
+    models "goblog/models"
 )
 
-templ Index(posts []model.Post) {
+templ Index(posts []models.Post) {
 	@layout.Base() {
 	 <ul>
         for _, post := range posts {
@@ -19,7 +19,7 @@ templ Index(posts []model.Post) {
 	}
 }
 
-templ Show(post model.Post) {
+templ Show(post models.Post) {
     @layout.Base() {
         <h1>{ post.Title }</h1>
         <p>By { post.Author }</p>
@@ -50,7 +50,7 @@ templ New() {
     }
 }
 
-templ Edit(post model.Post) {
+templ Edit(post models.Post) {
     @layout.Base() {
         <h1>Edit post</h1>
         <form action="/posts/{ post.Id }" method="post">

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"goblog/view/hello"
+	"goblog/views/hello"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"goblog/model"
-	"goblog/view/posts"
+	models "goblog/models"
+	"goblog/views/posts"
 	"net/http"
 	"strconv"
 
@@ -28,8 +28,8 @@ func (h *Posts) index(c *fiber.Ctx) error {
 
 // indexJSON handles the JSON response for listing all posts.
 func (h *Posts) indexJSON(c *fiber.Ctx) error {
-	var rows []model.Post
-	tx := model.DB.Find(&rows)
+	var rows []models.Post
+	tx := models.DB.Find(&rows)
 	if tx.Error != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve posts"})
 	}
@@ -38,8 +38,8 @@ func (h *Posts) indexJSON(c *fiber.Ctx) error {
 
 // indexTempl handles the Templ rendering for listing all posts.
 func (h *Posts) indexTempl(c *fiber.Ctx) error {
-	var rows []model.Post
-	tx := model.DB.Find(&rows)
+	var rows []models.Post
+	tx := models.DB.Find(&rows)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("No posts found"))
 	}
@@ -58,8 +58,8 @@ func (h *Posts) showJSON(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID format"})
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Post not found"})
 	}
@@ -74,8 +74,8 @@ func (h *Posts) showTempl(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -105,7 +105,7 @@ func (h *Posts) create(c *fiber.Ctx) error {
 
 // createJSON handles the JSON response for creating a new post.
 func (h *Posts) createJSON(c *fiber.Ctx) error {
-	var post model.Post
+	var post models.Post
 
 	// Parse the request body into the post model.
 	if err := c.BodyParser(&post); err != nil {
@@ -118,7 +118,7 @@ func (h *Posts) createJSON(c *fiber.Ctx) error {
 	}
 
 	// Save the new post.
-	tx := model.DB.Create(&post)
+	tx := models.DB.Create(&post)
 	if tx.Error != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create post"})
 	}
@@ -139,14 +139,14 @@ func (h *Posts) createTempl(c *fiber.Ctx) error {
 	}
 
 	// Create a new post.
-	post := model.Post{
+	post := models.Post{
 		Title:   title,
 		Content: content,
 		Author:  author,
 	}
 
 	// Save the new post.
-	tx := model.DB.Create(&post)
+	tx := models.DB.Create(&post)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to create post"))
 	}
@@ -167,8 +167,8 @@ func (h *Posts) editJSON(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID format"})
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Post not found"})
 	}
@@ -183,8 +183,8 @@ func (h *Posts) editTempl(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -206,14 +206,14 @@ func (h *Posts) updateJSON(c *fiber.Ctx) error {
 	}
 
 	// Find the post to update.
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Post not found"})
 	}
 
 	// Parse the request body into the post model.
-	var body model.Post
+	var body models.Post
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid JSON format"})
 	}
@@ -230,7 +230,7 @@ func (h *Posts) updateJSON(c *fiber.Ctx) error {
 	}
 
 	// Save the updated post.
-	tx = model.DB.Save(&res)
+	tx = models.DB.Save(&res)
 	if tx.Error != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update post"})
 	}
@@ -248,8 +248,8 @@ func (h *Posts) updateTempl(c *fiber.Ctx) error {
 	}
 
 	// Find the post to update.
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -270,7 +270,7 @@ func (h *Posts) updateTempl(c *fiber.Ctx) error {
 	}
 
 	// Save the updated post.
-	tx = model.DB.Save(res)
+	tx = models.DB.Save(res)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to update post"))
 	}
@@ -291,13 +291,13 @@ func (h *Posts) deleteJSON(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID format"})
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Post not found"})
 	}
 
-	tx = model.DB.Delete(&res)
+	tx = models.DB.Delete(&res)
 	if tx.Error != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete post"})
 	}
@@ -312,13 +312,13 @@ func (h *Posts) deleteTempl(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res model.Post
-	tx := model.DB.First(&res, id)
+	var res models.Post
+	tx := models.DB.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	tx = model.DB.Delete(&res)
+	tx = models.DB.Delete(&res)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to delete post"))
 	}

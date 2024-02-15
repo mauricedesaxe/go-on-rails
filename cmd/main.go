@@ -2,7 +2,7 @@ package main
 
 import (
 	"goblog/handler"
-	"goblog/model"
+	models "goblog/models"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	app := fiber.New()
-	model.DB = model.InitDB("store.db")
+	models.DB = models.InitDB("store.db")
 
 	app.Use(fiberLogger.New())
 
