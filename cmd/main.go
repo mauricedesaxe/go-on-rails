@@ -15,10 +15,9 @@ func main() {
 
 	app.Use(fiberLogger.New())
 
-	app.Get("/", controllers.HandleHelloIndex)
-
 	// Create a slice of route registrars
 	registrars := []controllers.RouteRegistrar{
+		&controllers.Hello{},
 		&controllers.Posts{},
 	}
 
