@@ -6,11 +6,15 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
 	app := fiber.New()
 	model.DB = model.InitDB("store.db")
+
+	app.Use(fiberLogger.New())
+
 	app.Get("/", handler.HandleHelloIndex)
 
 	// Create a slice of route registrars
