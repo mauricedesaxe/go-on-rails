@@ -236,7 +236,7 @@ func (h *Posts) updateJSON(c *fiber.Ctx) error {
 	}
 
 	// Return the updated post.
-	return c.Status(http.StatusAccepted).JSON(res)
+	return c.Status(http.StatusOK).JSON(res)
 }
 
 // updateTempl handles the Templ rendering for updating a post.
