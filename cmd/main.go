@@ -1,7 +1,7 @@
 package main
 
 import (
-	"goblog/handler"
+	controllers "goblog/controllers"
 	models "goblog/models"
 	"log"
 
@@ -15,11 +15,11 @@ func main() {
 
 	app.Use(fiberLogger.New())
 
-	app.Get("/", handler.HandleHelloIndex)
+	app.Get("/", controllers.HandleHelloIndex)
 
 	// Create a slice of route registrars
-	registrars := []handler.RouteRegistrar{
-		&handler.Posts{},
+	registrars := []controllers.RouteRegistrar{
+		&controllers.Posts{},
 	}
 
 	// Register routes for each registrar
