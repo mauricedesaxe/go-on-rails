@@ -11,7 +11,7 @@ type RouteRegistrar interface {
 	RegisterRoutes(app *fiber.App)
 }
 
-// CompleteResourceController is an interface that defines the methods that a handler must implement
+// CompleteResourceController is an interface that defines the methods that a controller must implement
 type CompleteResourceController interface {
 	index(c *fiber.Ctx) error
 	show(c *fiber.Ctx) error

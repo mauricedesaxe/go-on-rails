@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPostHandler(t *testing.T) {
+func TestPostController(t *testing.T) {
 	// Setup
 	models.DB = models.InitDB("store.test.db")
 	defer func() {
