@@ -63,7 +63,9 @@ func AsyncRunLimited(job Job) {
 // Irregularly scheduled jobs
 // =================================================================================================
 
-// queue is a channel for all irregularly scheduled jobs to be added to and processed by the runner
+// queue is a channel for all irregularly scheduled jobs to be added to and processed by the runner.
+// we chose to use a simple native go channel instead of other ways of managing the queue, 
+// but you can also integrate with RabbitMQ/Kafka for this or even use a SQL or Redis db for this.
 var queue chan Job = make(chan Job)
 
 // shutdownChan is a channel used to signal the runner to stop processing irregular jobs
