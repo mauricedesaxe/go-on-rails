@@ -8,5 +8,14 @@ import (
 templ Index() {
 	@layout.Base() {
 		<h1>hello there</h1>
+		<p>Here's a list of all models:</p>
+		<ul>
+			<li>
+				<a class="text-blue-600 hover:underline" href="/users">User</a>
+			</li>
+			<li>
+				<a class="text-blue-600 hover:underline" href="/posts">Post</a>
+			</li>
+		</ul>
 	}
 }

@@ -33,7 +33,7 @@ func Index() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>hello there</h1>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>hello there</h1><p>Here's a list of all models:</p><ul><li><a class=\"text-blue-600 hover:underline\" href=\"/users\">User</a></li><li><a class=\"text-blue-600 hover:underline\" href=\"/posts\">Post</a></li></ul>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
