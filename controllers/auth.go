@@ -19,6 +19,7 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Post("/login", a.doLogin)
 	app.Get("/signup", a.signup)
 	app.Post("/signup", a.doSignup)
+	app.Get("/logout", a.logout)
 }
 
 // GET /profile - profile - Show the profile of the logged in user
@@ -130,4 +131,23 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 
 	// redirect to profile
 	return c.Redirect("/profile")
+}
+
+// GET /logout - logout - Log the user out
+func (a *AuthController) logout(c *fiber.Ctx) error {
+	// get session
+	sess, err := a.SessionStore.Get(c)
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// remove user id from session
+	sess.Delete("user_id")
+	err = sess.Save()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// redirect to login
+	return c.Redirect("/login")
 }
