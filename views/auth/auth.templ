@@ -18,7 +18,18 @@ templ Profile(user models.User) {
 templ NotLoggedIn() {
     @layout.Base() {
         <h1>You are not logged in</h1>
-        <p>Please log in to access this page</p>
+        <p>Please <a class="text-blue-600 hover:underline" href="/login">log in</a> to access this page</p>
+    }
+}
+
+templ Login() {
+    @layout.Base() {
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="Username" />
+            <input type="password" name="password" placeholder="Password" />
+            <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Login" />
+        </form>
     }
 }
 

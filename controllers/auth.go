@@ -14,6 +14,7 @@ type AuthController struct {
 // RegisterRoutes registers the auth-related routes
 func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/profile", a.profile)
+	app.Get("/login", a.login)
 }
 
 // GET /profile - profile - Show the profile of the logged in user
@@ -39,4 +40,9 @@ func (a *AuthController) profile(c *fiber.Ctx) error {
 
 	// render the profile
 	return RenderTempl(c, auth.Profile(user))
+}
+
+// GET /login - login - Show the login form
+func (a *AuthController) login(c *fiber.Ctx) error {
+	return RenderTempl(c, auth.Login())
 }
