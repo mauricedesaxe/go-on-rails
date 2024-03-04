@@ -401,7 +401,7 @@ func ForgotPassword() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Forgot Password</h1><form action=\"/forgot-password\" method=\"post\"><input type=\"email\" name=\"email\" placeholder=\"Email\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Reset Password\"><p>Remembered your password? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Forgot Password</h1><form action=\"/forgot-password\" method=\"post\"><input type=\"email\" name=\"email\" placeholder=\"Email\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Send reset link\"><p>Remembered your password? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
