@@ -28,6 +28,7 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Put("/profile", a.updateProfile)
 	app.Get("/forgot-password", a.forgotPassword)
 	app.Post("/forgot-password", a.doForgotPassword)
+	app.Get("/reset-password", a.resetPassword)
 	app.Get("/logout", a.logout)
 }
 
@@ -264,6 +265,13 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 
 	// redirect to login
 	return c.Redirect("/login")
+}
+
+// GET /reset-password - resetPassword - Show the reset password form
+func (a *AuthController) resetPassword(c *fiber.Ctx) error {
+	email := c.Query("email")
+	tokenValue := c.Query("token")
+	return RenderTempl(c, auth.ResetPassword(email, tokenValue))
 }
 
 // GET /logout - logout - Log the user out
