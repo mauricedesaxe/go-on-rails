@@ -12,6 +12,7 @@ templ Profile(user models.User) {
     @layout.Base() {
         <h1>You are logged in as { user.Username }</h1>
         <p>{ user.Email }</p>
+        <p><a class="text-blue-600 hover:underline" href="/profile/edit">Edit Profile</a></p>
         <p><a class="text-red-600 hover:underline" href="/logout">Logout</a></p>
     }
 }
@@ -31,6 +32,19 @@ templ Login() {
             <input type="password" name="password" placeholder="Password" />
             <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Login" />
             <p>Don't have an account? <a class="text-blue-600 hover:underline" href="/signup">Signup</a></p>
+        </form>
+    }
+}
+
+templ EditProfile(user models.User) {
+    @layout.Base() {
+        <h1>Edit Profile</h1>
+        <form action="/profile" method="put">
+            <input type="text" name="username" placeholder="Username" value={ user.Username } />
+            <input type="email" name="email" placeholder="Email" value={user.Email} /> 
+            <input type="password" name="password" placeholder="Password" />
+            <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Save" />
+            <p><a class="text-red-600 hover:underline" href="/profile">Cancel</a></p>
         </form>
     }
 }

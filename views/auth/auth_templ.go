@@ -61,7 +61,7 @@ func Profile(user models.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p><a class=\"text-red-600 hover:underline\" href=\"/logout\">Logout</a></p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p><a class=\"text-blue-600 hover:underline\" href=\"/profile/edit\">Edit Profile</a></p><p><a class=\"text-red-600 hover:underline\" href=\"/logout\">Logout</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -159,7 +159,7 @@ func Login() templ.Component {
 	})
 }
 
-func Signup() templ.Component {
+func EditProfile(user models.User) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -178,7 +178,23 @@ func Signup() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Signup</h1><form action=\"/signup\" method=\"post\"><input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"email\" name=\"email\" placeholder=\"Email\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Signup\"><p>Already have an account? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Edit Profile</h1><form action=\"/profile\" method=\"put\"><input type=\"text\" name=\"username\" placeholder=\"Username\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(user.Username))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input type=\"email\" name=\"email\" placeholder=\"Email\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(user.Email))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Save\"><p><a class=\"text-red-600 hover:underline\" href=\"/profile\">Cancel</a></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -198,7 +214,7 @@ func Signup() templ.Component {
 	})
 }
 
-func Error(msg string) templ.Component {
+func Signup() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -217,16 +233,55 @@ func Error(msg string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Signup</h1><form action=\"/signup\" method=\"post\"><input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"email\" name=\"email\" placeholder=\"Email\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Signup\"><p>Already have an account? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if !templ_7745c5c3_IsBuffer {
+				_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
+			}
+			return templ_7745c5c3_Err
+		})
+		templ_7745c5c3_Err = layout.Base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Error(msg string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var14 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+			if !templ_7745c5c3_IsBuffer {
+				templ_7745c5c3_Buffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Unexpected error</h1><p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 53, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 67, Col: 16}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -239,7 +294,7 @@ func Error(msg string) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = layout.Base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layout.Base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var14), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

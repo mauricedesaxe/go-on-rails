@@ -19,6 +19,8 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Post("/login", a.doLogin)
 	app.Get("/signup", a.signup)
 	app.Post("/signup", a.doSignup)
+	app.Get("/profile/edit", a.editProfile)
+	app.Put("/profile", a.updateProfile)
 	app.Get("/logout", a.logout)
 }
 
@@ -127,6 +129,73 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 	err = sess.Save()
 	if err != nil {
 		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// redirect to profile
+	return c.Redirect("/profile")
+}
+
+// GET /profile/edit - editProfile - Show the form to edit the profile of the logged in user
+func (a *AuthController) editProfile(c *fiber.Ctx) error {
+	// get session
+	sess, err := a.SessionStore.Get(c)
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// get user id from session
+	userID := sess.Get("user_id")
+	if userID == nil {
+		return RenderTempl(c, auth.NotLoggedIn())
+	}
+
+	// get user from database
+	user := models.User{ID: userID.(uint)}
+	err = user.Read()
+	if err != nil {
+		return RenderTempl(c, auth.Error("User not found"))
+	}
+
+	// render the edit profile form
+	return RenderTempl(c, auth.EditProfile(user))
+}
+
+// PUT /profile - updateProfile - Update the profile of the logged in user
+func (a *AuthController) updateProfile(c *fiber.Ctx) error {
+	// get session
+	sess, err := a.SessionStore.Get(c)
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// get user id from session
+	userID := sess.Get("user_id")
+	if userID == nil {
+		return RenderTempl(c, auth.NotLoggedIn())
+	}
+
+	// get user from database
+	user := models.User{ID: userID.(uint)}
+	err = user.Read()
+	if err != nil {
+		return RenderTempl(c, auth.Error("User not found"))
+	}
+
+	// update user
+	if c.FormValue("username") != "" {
+		user.Username = c.FormValue("username")
+	}
+	if c.FormValue("email") != "" {
+		user.Email = c.FormValue("email")
+	}
+	if c.FormValue("password") != "" {
+		user.Password = c.FormValue("password")
+	}
+
+	// save the user
+	err = user.Update()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
 	}
 
 	// redirect to profile
