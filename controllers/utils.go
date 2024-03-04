@@ -22,18 +22,6 @@ type CompleteResourceController interface {
 	delete(c *fiber.Ctx) error
 }
 
-// ResponseHandler defines a function that handles the response in a specific format.
-type ResponseHandler func(*fiber.Ctx) error
-
-// HandleResponse decides whether to handle the response as JSON or as a Templ rendering,
-// based on the "Accept" header of the request.
-func HandleResponse(c *fiber.Ctx, handleJSON ResponseHandler, handleTempl ResponseHandler) error {
-	if c.Get("Content-Type") == "application/json" {
-		return handleJSON(c)
-	}
-	return handleTempl(c)
-}
-
 func RenderTempl(c *fiber.Ctx, component templ.Component, options ...func(*templ.ComponentHandler)) error {
 	componentHandler := templ.Handler(component)
 	for _, o := range options {
