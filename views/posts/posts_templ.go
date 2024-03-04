@@ -11,9 +11,9 @@ import "io"
 import "bytes"
 
 import (
-	"goblog/views/layout"
+	"github.com/mauricedesaxe/go-on-rails/views/layout"
 
-	models "goblog/models"
+	models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
 func Index(posts []models.Post) templ.Component {

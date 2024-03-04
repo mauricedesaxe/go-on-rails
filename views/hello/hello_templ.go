@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"goblog/views/layout"
+	"github.com/mauricedesaxe/go-on-rails/views/layout"
 )
 
 func Index() templ.Component {

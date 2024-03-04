@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"goblog/views/hello"
+	"github.com/mauricedesaxe/go-on-rails/views/hello"
 
 	"github.com/gofiber/fiber/v2"
 )

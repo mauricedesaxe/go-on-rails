@@ -1,13 +1,14 @@
 package main
 
 import (
-	controllers "goblog/controllers"
-	"goblog/jobs"
-	models "goblog/models"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	controllers "github.com/mauricedesaxe/go-on-rails/controllers"
+	"github.com/mauricedesaxe/go-on-rails/jobs"
+	models "github.com/mauricedesaxe/go-on-rails/models"
 
 	"github.com/gofiber/fiber/v2"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"

@@ -1,4 +1,4 @@
-module goblog
+module github.com/mauricedesaxe/go-on-rails
 
 go 1.21.0
 

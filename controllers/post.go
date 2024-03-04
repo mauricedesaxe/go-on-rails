@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	models "goblog/models"
-	"goblog/views/posts"
 	"net/http"
 	"strconv"
+
+	models "github.com/mauricedesaxe/go-on-rails/models"
+	"github.com/mauricedesaxe/go-on-rails/views/posts"
 
 	"github.com/gofiber/fiber/v2"
 )
