@@ -106,7 +106,7 @@ func (t *Token) Create() (string, error) {
 // Reads a token by email where CreatedAt is no older than 24 hours.
 // You're meant to check the read value against another hashed value to verify the token.
 func (t *Token) Read() error {
-	return DB.First(t, "email = ? AND created_at > ?", t.Email, t.Value, time.Now().Add(-24*time.Hour)).Error
+	return DB.First(t, "email = ? AND created_at > ?", t.Email, time.Now().Add(-24*time.Hour)).Error
 }
 
 // Delete deletes a token by email and value.
