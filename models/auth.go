@@ -1,8 +1,8 @@
 package model
 
 import (
+	"crypto/rand"
 	"errors"
-	"math/rand"
 	"regexp"
 	"strings"
 	"time"
@@ -80,11 +80,15 @@ func (t *Token) Create() (string, error) {
 		return "", errors.New("invalid email address")
 	}
 
-	// Generate a random 32 character string
+	// Generate a random 32 character string using crypto/rand for better randomness
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#%^&*"
 	b := make([]byte, 32)
+	_, err = rand.Read(b)
+	if err != nil {
+		return "", err
+	}
 	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+		b[i] = charset[b[i]%byte(len(charset))]
 	}
 	val := string(b)
 
