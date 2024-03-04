@@ -4,9 +4,29 @@ package auth
 
 import (
 	"github.com/mauricedesaxe/go-on-rails/views/layout"
+    "strconv"
 
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
+
+templ Index(users []models.User) {
+    @layout.Base() {
+        <h1>Users</h1>
+        <ul>
+            for _, user := range users {
+                <li>{ user.Email } | <a class="text-blue-600 hover:underline" href={ templ.SafeURL("/users/" + strconv.Itoa(int(user.ID))) }>Show</a></li>
+            }
+        </ul>
+    }
+}
+
+templ Show(user models.User) {
+    @layout.Base() {
+        <h1>{ user.Email }</h1>
+        <p>{ user.CreatedAt.Format("2006-01-02") }</p>
+        <p><a class="text-blue-600 hover:underline" href="/users">Back</a></p>
+    }
+}
 
 templ Profile(user models.User) {
     @layout.Base() {

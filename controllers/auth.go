@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	models "github.com/mauricedesaxe/go-on-rails/models"
@@ -14,6 +16,8 @@ type AuthController struct {
 
 // RegisterRoutes registers the auth-related routes
 func (a *AuthController) RegisterRoutes(app *fiber.App) {
+	app.Get("/users", a.index)
+	app.Get("/users/:id", a.show)
 	app.Get("/profile", a.profile)
 	app.Get("/login", a.login)
 	app.Post("/login", a.doLogin)
@@ -24,6 +28,30 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/forgot-password", a.forgotPassword)
 	app.Post("/forgot-password", a.doForgotPassword)
 	app.Get("/logout", a.logout)
+}
+
+// GET /users/ - index - List all users
+func (a *AuthController) index(c *fiber.Ctx) error {
+	var users []models.User
+	tx := models.DB.Find(&users)
+	if tx.Error != nil {
+		return RenderTempl(c, auth.Error("No users found"))
+	}
+	return RenderTempl(c, auth.Index(users))
+}
+
+// GET /users/:id - show - Show a single user
+func (a *AuthController) show(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return RenderTempl(c, auth.Error("Invalid ID format"))
+	}
+	user := models.User{ID: uint(id)}
+	err = user.Read()
+	if err != nil {
+		return RenderTempl(c, auth.Error("User not found"))
+	}
+	return RenderTempl(c, auth.Show(user))
 }
 
 // GET /profile - profile - Show the profile of the logged in user
