@@ -3,3 +3,6 @@ bin
 .build
 .env
 *.db
+*.sqlite
+*.sqlite3
+

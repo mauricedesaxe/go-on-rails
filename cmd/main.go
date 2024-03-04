@@ -11,7 +11,18 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/sqlite3"
 )
+
+var sessionStore *session.Store
+
+func init() {
+	storage := sqlite3.New() // From github.com/gofiber/storage/sqlite3
+	sessionStore = session.New(session.Config{
+		Storage: storage,
+	})
+}
 
 func main() {
 	app := fiber.New()
