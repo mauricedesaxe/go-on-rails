@@ -243,8 +243,17 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
 
-	token := "123456" // TODO generate a random token
-	link := "http://localhost:3000/reset-password?email=" + user.Email + "&token=" + token
+	// create a token
+	token := models.Token{
+		Email: user.Email,
+	}
+	tokenValue, err := token.Create()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to create token: "+err.Error()))
+	}
+
+	// send email with token
+	link := "http://localhost:3000/reset-password?email=" + user.Email + "&token=" + tokenValue
 	ej := jobs.EmailJob{
 		From:    "noreply@GoOnRails.com",
 		To:      user.Email,

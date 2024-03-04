@@ -66,16 +66,17 @@ type Token struct {
 	Value string `gorm:"primaryKey"`
 }
 
-// Note that this hashes the token value before storing the token.
-func (t *Token) Create() error {
+// Note that this hashes the token value before storing the token. The unhashed value is returned for
+// use in the email link.
+func (t *Token) Create() (string, error) {
 	// Validate the email
 	if len(t.Email) < 3 {
-		return errors.New("email too short, must be at least 3 characters")
+		return "", errors.New("email too short, must be at least 3 characters")
 	}
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	matched, err := regexp.MatchString(emailRegex, t.Email)
 	if err != nil || !matched {
-		return errors.New("invalid email address")
+		return "", errors.New("invalid email address")
 	}
 
 	// Generate a random 32 character string
@@ -89,12 +90,12 @@ func (t *Token) Create() error {
 	// Hash the random string
 	hashed, err := Hash(val)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// Store the hashed string
+	// Store the hashed string and return the unhashed string for use in the email link
 	t.Value = hashed
-	return DB.Create(t).Error
+	return val, DB.Create(t).Error
 }
 
 // Reads a token by email and value where CreatedAt is no older than 24 hours.
