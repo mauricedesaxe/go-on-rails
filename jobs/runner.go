@@ -64,7 +64,7 @@ func AsyncRunLimited(job Job) {
 // =================================================================================================
 
 // queue is a channel for all irregularly scheduled jobs to be added to and processed by the runner.
-// we chose to use a simple native go channel instead of other ways of managing the queue, 
+// we chose to use a simple native go channel instead of other ways of managing the queue,
 // but you can also integrate with RabbitMQ/Kafka for this or even use a SQL or Redis db for this.
 var queue chan Job = make(chan Job)
 
@@ -96,6 +96,7 @@ func StopQueue() {
 }
 
 // AddToQueue adds a job to the Queue
+// * Call this with a pre-defined job to add it to the queue
 func AddToQueue(job Job) {
 	queue <- job
 }
@@ -127,7 +128,7 @@ func StartSchedule() {
 			log.Printf("Failed to schedule daily job: %v", err)
 		}
 
-		// Add more scheduled jobs here
+		// * Add more scheduled jobs here, like the daily hello job above
 
 		c.Start()
 
