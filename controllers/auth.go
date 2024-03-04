@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -254,8 +255,14 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 		return RenderTempl(c, auth.Error("Failed to create token: "+err.Error()))
 	}
 
+	var baseURL string
+	baseURL = os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:3000"
+	}
+
 	// send email with token
-	link := "http://localhost:3000/reset-password?email=" + user.Email + "&token=" + tokenValue
+	link := baseURL + "/reset-password?email=" + user.Email + "&token=" + tokenValue
 	ej := jobs.EmailJob{
 		From:    "noreply@GoOnRails.com",
 		To:      user.Email,
