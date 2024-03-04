@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	"github.com/mauricedesaxe/go-on-rails/views/auth"
 	"golang.org/x/crypto/bcrypt"
@@ -242,7 +243,15 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
 
-	// TODO send email with reset link
+	token := "123456" // TODO generate a random token
+	link := "http://localhost:3000/reset-password?email=" + user.Email + "&token=" + token
+	ej := jobs.EmailJob{
+		From:    "noreply@GoOnRails.com",
+		To:      user.Email,
+		Subject: "Reset your password",
+		Body:    "Click this link to reset your password: " + link,
+	}
+	jobs.AddToQueue(ej)
 
 	// redirect to login
 	return c.Redirect("/login")
