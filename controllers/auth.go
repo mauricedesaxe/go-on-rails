@@ -29,6 +29,7 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/forgot-password", a.forgotPassword)
 	app.Post("/forgot-password", a.doForgotPassword)
 	app.Get("/reset-password", a.resetPassword)
+	app.Put("/reset-password", a.doResetPassword)
 	app.Get("/logout", a.logout)
 }
 
@@ -272,6 +273,50 @@ func (a *AuthController) resetPassword(c *fiber.Ctx) error {
 	email := c.Query("email")
 	tokenValue := c.Query("token")
 	return RenderTempl(c, auth.ResetPassword(email, tokenValue))
+}
+
+// PUT /reset-password - doResetPassword - Process the reset password form
+func (a *AuthController) doResetPassword(c *fiber.Ctx) error {
+	// get user from database
+	user := models.User{Email: c.FormValue("email")}
+	err := user.ReadByEmail()
+	if err != nil {
+		return RenderTempl(c, auth.Error("User not found"))
+	}
+
+	// get token from database
+	token := models.Token{
+		Email: user.Email,
+	}
+	err = token.Read()
+	if err != nil {
+		return RenderTempl(c, auth.Error("No valid tokens were found for this email, please request a new one"))
+	}
+
+	// validate token value
+	hashedToken, err := models.Hash(c.FormValue("token"))
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to hash input token: "+err.Error()))
+	}
+	if hashedToken != token.Value {
+		return RenderTempl(c, auth.Error("Invalid token"))
+	}
+
+	// update user password
+	user.Password = c.FormValue("password")
+	err = user.Update()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
+	}
+
+	// delete token
+	err = token.Delete()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to delete token: "+err.Error()))
+	}
+
+	// redirect to login
+	return c.Redirect("/login")
 }
 
 // GET /logout - logout - Log the user out
