@@ -122,6 +122,9 @@ func ValidateUserInput(u *User) error {
 	if len(u.Password) < 16 {
 		return errors.New("password too short, must be at least 16 characters")
 	}
+	if len(u.Password) > 128 {
+		return errors.New("password too long, must be at most 128 characters")
+	}
 	// check password to have a mix of upper/lower case, numbers and special characters
 	upper := false
 	lower := false
