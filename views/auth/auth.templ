@@ -29,6 +29,20 @@ templ Login() {
             <input type="text" name="username" placeholder="Username" />
             <input type="password" name="password" placeholder="Password" />
             <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Login" />
+            <p>Don't have an account? <a class="text-blue-600 hover:underline" href="/signup">Signup</a></p>
+        </form>
+    }
+}
+
+templ Signup() {
+    @layout.Base() {
+        <h1>Signup</h1>
+        <form action="/signup" method="post">
+            <input type="text" name="username" placeholder="Username" />
+            <input type="email" name="email" placeholder="Email" />
+            <input type="password" name="password" placeholder="Password" />
+            <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Signup" />
+            <p>Already have an account? <a class="text-blue-600 hover:underline" href="/login">Login</a></p>
         </form>
     }
 }

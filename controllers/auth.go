@@ -17,6 +17,8 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/profile", a.profile)
 	app.Get("/login", a.login)
 	app.Post("/login", a.doLogin)
+	app.Get("/signup", a.signup)
+	app.Post("/signup", a.doSignup)
 }
 
 // GET /profile - profile - Show the profile of the logged in user
@@ -74,6 +76,49 @@ func (a *AuthController) doLogin(c *fiber.Ctx) error {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.FormValue("password")))
 	if err != nil {
 		return RenderTempl(c, auth.Error("Invalid password"))
+	}
+
+	// set user id in session
+	sess.Set("user_id", user.ID)
+	err = sess.Save()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// redirect to profile
+	return c.Redirect("/profile")
+}
+
+// GET /signup - signup - Show the signup form
+func (a *AuthController) signup(c *fiber.Ctx) error {
+	return RenderTempl(c, auth.Signup())
+}
+
+// POST /signup - doSignup - Process the signup form
+func (a *AuthController) doSignup(c *fiber.Ctx) error {
+	// get session
+	sess, err := a.SessionStore.Get(c)
+	if err != nil {
+		return RenderTempl(c, auth.Error("Session error"))
+	}
+
+	// check if user is already logged in
+	userID := sess.Get("user_id")
+	if userID != nil {
+		return c.Redirect("/profile")
+	}
+
+	// create a new user
+	user := models.User{
+		Username: c.FormValue("username"),
+		Email:    c.FormValue("email"),
+		Password: c.FormValue("password"),
+	}
+
+	// save the user
+	err = user.Create()
+	if err != nil {
+		return RenderTempl(c, auth.Error("Failed to create user"))
 	}
 
 	// set user id in session
