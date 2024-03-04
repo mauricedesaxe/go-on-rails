@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
 type User struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey"`
@@ -73,7 +75,6 @@ func (t *Token) Create() (string, error) {
 	if len(t.Email) < 3 {
 		return "", errors.New("email too short, must be at least 3 characters")
 	}
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	matched, err := regexp.MatchString(emailRegex, t.Email)
 	if err != nil || !matched {
 		return "", errors.New("invalid email address")
@@ -114,7 +115,6 @@ func ValidateUserInput(u *User) error {
 	if len(u.Email) < 3 {
 		return errors.New("email too short, must be at least 3 characters")
 	}
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	matched, err := regexp.MatchString(emailRegex, u.Email)
 	if err != nil || !matched {
 		return errors.New("invalid email address")
