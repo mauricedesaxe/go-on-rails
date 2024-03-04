@@ -21,6 +21,8 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Post("/signup", a.doSignup)
 	app.Get("/profile/edit", a.editProfile)
 	app.Put("/profile", a.updateProfile)
+	app.Get("/forgot-password", a.forgotPassword)
+	app.Post("/forgot-password", a.doForgotPassword)
 	app.Get("/logout", a.logout)
 }
 
@@ -200,6 +202,26 @@ func (a *AuthController) updateProfile(c *fiber.Ctx) error {
 
 	// redirect to profile
 	return c.Redirect("/profile")
+}
+
+// GET /forgot-password - forgotPassword - Show the forgot password form
+func (a *AuthController) forgotPassword(c *fiber.Ctx) error {
+	return RenderTempl(c, auth.ForgotPassword())
+}
+
+// POST /forgot-password - doForgotPassword - Process the forgot password form
+func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
+	// get user from database
+	user := models.User{Email: c.FormValue("email")}
+	err := user.ReadByEmail()
+	if err != nil {
+		return RenderTempl(c, auth.Error("User not found"))
+	}
+
+	// TODO send email with reset link
+
+	// redirect to login
+	return c.Redirect("/login")
 }
 
 // GET /logout - logout - Log the user out
