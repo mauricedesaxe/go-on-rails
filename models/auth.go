@@ -1,6 +1,9 @@
 package model
 
 import (
+	"errors"
+	"regexp"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +20,10 @@ type User struct {
 
 // Note that this hashes the password before storing the user.
 func (u *User) Create() error {
+	err := ValidateUserInput(u)
+	if err != nil {
+		return err
+	}
 	hashed, err := Hash(u.Password)
 	if err != nil {
 		return err
@@ -39,6 +46,10 @@ func (u *User) ReadByEmail() error {
 
 // Note that this hashes the password before storing the user.
 func (u *User) Update() error {
+	err := ValidateUserInput(u)
+	if err != nil {
+		return err
+	}
 	hashed, err := Hash(u.Password)
 	if err != nil {
 		return err
@@ -79,6 +90,50 @@ func (t *Token) Delete() error {
 	return DB.Delete(t, "email = ? AND value = ?", t.Email, t.Value).Error
 }
 
+// ValidateUserInput checks if the user input meets the requirements.
+func ValidateUserInput(u *User) error {
+	if len(u.Username) < 4 {
+		return errors.New("username too short, must be at least 4 characters")
+	}
+	usernameRegex := `^[a-zA-Z0-9._-]{4,}$`
+	matched, err := regexp.MatchString(usernameRegex, u.Username)
+	if err != nil || !matched {
+		return errors.New("invalid username, must be alphanumeric and may contain ._-")
+	}
+	if len(u.Email) < 3 {
+		return errors.New("email too short, must be at least 3 characters")
+	}
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	matched, err = regexp.MatchString(emailRegex, u.Email)
+	if err != nil || !matched {
+		return errors.New("invalid email address")
+	}
+	if len(u.Password) < 16 {
+		return errors.New("password too short, must be at least 16 characters")
+	}
+	// check password to have a mix of upper/lower case, numbers and special characters
+	upper := false
+	lower := false
+	number := false
+	special := false
+	for _, c := range u.Password {
+		switch {
+		case 'A' <= c && c <= 'Z':
+			upper = true
+		case 'a' <= c && c <= 'z':
+			lower = true
+		case '0' <= c && c <= '9':
+			number = true
+		case strings.ContainsRune("!@#$%^&*()-_=+[]{};:,.<>?/\\|", c):
+			special = true
+		}
+	}
+	if !(upper && lower && number && special) {
+		return errors.New("password too weak, must contain upper/lower case, numbers and special characters")
+	}
+	return nil
+}
+
 // Hashes the input string using bcrypt, a one-way hashing algorithm.
 func Hash(input string) (output string, err error) {
 	if len(input) > 0 {
@@ -92,27 +147,4 @@ func Hash(input string) (output string, err error) {
 		output = string(hashBytes)
 	}
 	return output, nil
-}
-
-// Used to to keep the user logged in once authenticated.
-type Session struct {
-	gorm.Model
-	ID     uint `gorm:"primaryKey"`
-	UserID uint
-}
-
-func (s *Session) Create() error {
-	return DB.Create(s).Error
-}
-
-func (s *Session) Read() error {
-	return DB.First(s, s.ID).Error
-}
-
-func (s *Session) ReadByUserID() error {
-	return DB.Where("user_id = ?", s.UserID).First(s).Error
-}
-
-func (s *Session) Delete() error {
-	return DB.Delete(s).Error
 }
