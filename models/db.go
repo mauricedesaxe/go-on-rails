@@ -16,6 +16,8 @@ func InitDB(dest string) *gorm.DB {
 
 	// Migrate the schema
 	db.AutoMigrate(&Post{})
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Token{})
 
 	return db
 }
