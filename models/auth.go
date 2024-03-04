@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"math/rand"
 	"regexp"
 	"strings"
 	"time"
@@ -67,10 +68,31 @@ type Token struct {
 
 // Note that this hashes the token value before storing the token.
 func (t *Token) Create() error {
-	hashed, err := Hash(t.Value)
+	// Validate the email
+	if len(t.Email) < 3 {
+		return errors.New("email too short, must be at least 3 characters")
+	}
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	matched, err := regexp.MatchString(emailRegex, t.Email)
+	if err != nil || !matched {
+		return errors.New("invalid email address")
+	}
+
+	// Generate a random 32 character string
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#%^&*"
+	b := make([]byte, 32)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	val := string(b)
+
+	// Hash the random string
+	hashed, err := Hash(val)
 	if err != nil {
 		return err
 	}
+
+	// Store the hashed string
 	t.Value = hashed
 	return DB.Create(t).Error
 }
