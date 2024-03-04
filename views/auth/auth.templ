@@ -66,6 +66,9 @@ templ Error(msg string) {
     @layout.Base() {
         <h1>Unexpected error</h1>
         <p>{ msg }</p>
+        <p><a class="text-blue-600 hover:underline" href="/">Go back to home</a></p>
+        <p><a class="text-blue-600 hover:underline" href="/login">Go to login</a></p>
+        <p><a class="text-blue-600 hover:underline" href="/signup">Go to signup</a></p>
     }
 }
 

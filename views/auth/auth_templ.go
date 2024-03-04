@@ -285,7 +285,7 @@ func Error(msg string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p><a class=\"text-blue-600 hover:underline\" href=\"/\">Go back to home</a></p><p><a class=\"text-blue-600 hover:underline\" href=\"/login\">Go to login</a></p><p><a class=\"text-blue-600 hover:underline\" href=\"/signup\">Go to signup</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
