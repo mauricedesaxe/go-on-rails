@@ -119,7 +119,7 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 	// save the user
 	err = user.Create()
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to create user"))
+		return RenderTempl(c, auth.Error("Failed to create user: "+err.Error()))
 	}
 
 	// set user id in session
