@@ -40,9 +40,9 @@ func Profile(user models.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 12, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 12, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -139,7 +139,7 @@ func Login() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Login</h1><form action=\"/login\" method=\"post\"><input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Login\"><p>Don't have an account? <a class=\"text-blue-600 hover:underline\" href=\"/signup\">Signup</a></p></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Login</h1><form action=\"/login\" method=\"post\"><input type=\"email\" name=\"email\" placeholder=\"Email\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Login\"><p>Don't have an account? <a class=\"text-blue-600 hover:underline\" href=\"/signup\">Signup</a></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -178,15 +178,7 @@ func EditProfile(user models.User) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Edit Profile</h1><form action=\"/profile\" method=\"put\"><input type=\"text\" name=\"username\" placeholder=\"Username\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(user.Username))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input type=\"email\" name=\"email\" placeholder=\"Email\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Edit Profile</h1><form action=\"/profile\" method=\"put\"><input type=\"email\" name=\"email\" placeholder=\"Email\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -233,7 +225,7 @@ func Signup() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Signup</h1><form action=\"/signup\" method=\"post\"><input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"email\" name=\"email\" placeholder=\"Email\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Signup\"><p>Already have an account? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>Signup</h1><form action=\"/signup\" method=\"post\"><input type=\"email\" name=\"email\" placeholder=\"Email\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4\" type=\"submit\" value=\"Signup\"><p>Already have an account? <a class=\"text-blue-600 hover:underline\" href=\"/login\">Login</a></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -318,7 +310,7 @@ func Error(msg string) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 78, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/auth/auth.templ`, Line: 76, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {

@@ -71,8 +71,8 @@ func (a *AuthController) doLogin(c *fiber.Ctx) error {
 	}
 
 	// get user from database
-	user := models.User{Username: c.FormValue("username")}
-	err = user.ReadByUsername()
+	user := models.User{Email: c.FormValue("email")}
+	err = user.ReadByEmail()
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -115,7 +115,6 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 
 	// create a new user
 	user := models.User{
-		Username: c.FormValue("username"),
 		Email:    c.FormValue("email"),
 		Password: c.FormValue("password"),
 	}
@@ -184,9 +183,6 @@ func (a *AuthController) updateProfile(c *fiber.Ctx) error {
 	}
 
 	// update user
-	if c.FormValue("username") != "" {
-		user.Username = c.FormValue("username")
-	}
 	if c.FormValue("email") != "" {
 		user.Email = c.FormValue("email")
 	}

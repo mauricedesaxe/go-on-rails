@@ -13,7 +13,6 @@ import (
 type User struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey"`
-	Username string `gorm:"unique"`
 	Email    string `gorm:"unique"`
 	Password string
 }
@@ -34,10 +33,6 @@ func (u *User) Create() error {
 
 func (u *User) Read() error {
 	return DB.First(u, u.ID).Error
-}
-
-func (u *User) ReadByUsername() error {
-	return DB.Where("username = ?", u.Username).First(u).Error
 }
 
 func (u *User) ReadByEmail() error {
@@ -92,19 +87,11 @@ func (t *Token) Delete() error {
 
 // ValidateUserInput checks if the user input meets the requirements.
 func ValidateUserInput(u *User) error {
-	if len(u.Username) < 4 {
-		return errors.New("username too short, must be at least 4 characters")
-	}
-	usernameRegex := `^[a-zA-Z0-9._-]{4,}$`
-	matched, err := regexp.MatchString(usernameRegex, u.Username)
-	if err != nil || !matched {
-		return errors.New("invalid username, must be alphanumeric and may contain ._-")
-	}
 	if len(u.Email) < 3 {
 		return errors.New("email too short, must be at least 3 characters")
 	}
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	matched, err = regexp.MatchString(emailRegex, u.Email)
+	matched, err := regexp.MatchString(emailRegex, u.Email)
 	if err != nil || !matched {
 		return errors.New("invalid email address")
 	}
