@@ -1,0 +1,31 @@
+
+
+package auth
+
+import (
+	"github.com/mauricedesaxe/go-on-rails/views/layout"
+
+    models "github.com/mauricedesaxe/go-on-rails/models"
+)
+
+templ Profile(user models.User) {
+    @layout.Base() {
+        <h1>You are logged in as { user.Username }</h1>
+        <p>{ user.Email }</p>
+    }
+}
+
+templ NotLoggedIn() {
+    @layout.Base() {
+        <h1>You are not logged in</h1>
+        <p>Please log in to access this page</p>
+    }
+}
+
+templ Error(msg string) {
+    @layout.Base() {
+        <h1>Unexpected error</h1>
+        <p>{ msg }</p>
+    }
+}
+
