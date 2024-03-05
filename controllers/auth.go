@@ -13,14 +13,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthController struct {
+type Auth struct {
 	SessionStore  *session.Store
 	Environment   *env.Env
 	MailjetClient *mailjet.Client
 }
 
 // RegisterRoutes registers the auth-related routes
-func (a *AuthController) RegisterRoutes(app *fiber.App) {
+func (a *Auth) RegisterRoutes(app *fiber.App) {
 	app.Get("/users", a.index)
 	app.Get("/users/:id", a.show)
 	app.Get("/profile", a.profile)
@@ -38,7 +38,7 @@ func (a *AuthController) RegisterRoutes(app *fiber.App) {
 }
 
 // GET /users/ - index - List all users
-func (a *AuthController) index(c *fiber.Ctx) error {
+func (a *Auth) index(c *fiber.Ctx) error {
 	var users []models.User
 	tx := models.DB.Find(&users)
 	if tx.Error != nil {
@@ -48,7 +48,7 @@ func (a *AuthController) index(c *fiber.Ctx) error {
 }
 
 // GET /users/:id - show - Show a single user
-func (a *AuthController) show(c *fiber.Ctx) error {
+func (a *Auth) show(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return RenderTempl(c, auth.Error("Invalid ID format"))
@@ -62,7 +62,7 @@ func (a *AuthController) show(c *fiber.Ctx) error {
 }
 
 // GET /profile - profile - Show the profile of the logged in user
-func (a *AuthController) profile(c *fiber.Ctx) error {
+func (a *Auth) profile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
@@ -87,12 +87,12 @@ func (a *AuthController) profile(c *fiber.Ctx) error {
 }
 
 // GET /login - login - Show the login form
-func (a *AuthController) login(c *fiber.Ctx) error {
+func (a *Auth) login(c *fiber.Ctx) error {
 	return RenderTempl(c, auth.Login())
 }
 
 // POST /login - doLogin - Process the login form
-func (a *AuthController) doLogin(c *fiber.Ctx) error {
+func (a *Auth) doLogin(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
@@ -130,12 +130,12 @@ func (a *AuthController) doLogin(c *fiber.Ctx) error {
 }
 
 // GET /signup - signup - Show the signup form
-func (a *AuthController) signup(c *fiber.Ctx) error {
+func (a *Auth) signup(c *fiber.Ctx) error {
 	return RenderTempl(c, auth.Signup())
 }
 
 // POST /signup - doSignup - Process the signup form
-func (a *AuthController) doSignup(c *fiber.Ctx) error {
+func (a *Auth) doSignup(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
@@ -172,7 +172,7 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 }
 
 // GET /profile/edit - editProfile - Show the form to edit the profile of the logged in user
-func (a *AuthController) editProfile(c *fiber.Ctx) error {
+func (a *Auth) editProfile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
@@ -197,7 +197,7 @@ func (a *AuthController) editProfile(c *fiber.Ctx) error {
 }
 
 // PUT /profile - updateProfile - Update the profile of the logged in user
-func (a *AuthController) updateProfile(c *fiber.Ctx) error {
+func (a *Auth) updateProfile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
@@ -236,12 +236,12 @@ func (a *AuthController) updateProfile(c *fiber.Ctx) error {
 }
 
 // GET /forgot-password - forgotPassword - Show the forgot password form
-func (a *AuthController) forgotPassword(c *fiber.Ctx) error {
+func (a *Auth) forgotPassword(c *fiber.Ctx) error {
 	return RenderTempl(c, auth.ForgotPassword())
 }
 
 // POST /forgot-password - doForgotPassword - Process the forgot password form
-func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
+func (a *Auth) doForgotPassword(c *fiber.Ctx) error {
 	// get user from database
 	user := models.User{Email: c.FormValue("email")}
 	err := user.ReadByEmail()
@@ -275,14 +275,14 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 }
 
 // GET /reset-password - resetPassword - Show the reset password form
-func (a *AuthController) resetPassword(c *fiber.Ctx) error {
+func (a *Auth) resetPassword(c *fiber.Ctx) error {
 	email := c.Query("email")
 	tokenValue := c.Query("token")
 	return RenderTempl(c, auth.ResetPassword(email, tokenValue))
 }
 
 // PUT /reset-password - doResetPassword - Process the reset password form
-func (a *AuthController) doResetPassword(c *fiber.Ctx) error {
+func (a *Auth) doResetPassword(c *fiber.Ctx) error {
 	// get user from database
 	user := models.User{Email: c.FormValue("email")}
 	err := user.ReadByEmail()
@@ -326,7 +326,7 @@ func (a *AuthController) doResetPassword(c *fiber.Ctx) error {
 }
 
 // GET /logout - logout - Log the user out
-func (a *AuthController) logout(c *fiber.Ctx) error {
+func (a *Auth) logout(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
