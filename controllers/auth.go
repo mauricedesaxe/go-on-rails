@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/mailjet/mailjet-apiv3-go"
+	"github.com/mauricedesaxe/go-on-rails/env"
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	"github.com/mauricedesaxe/go-on-rails/views/auth"
@@ -13,7 +14,9 @@ import (
 )
 
 type AuthController struct {
-	SessionStore *session.Store
+	SessionStore  *session.Store
+	Environment   *env.Env
+	MailjetClient *mailjet.Client
 }
 
 // RegisterRoutes registers the auth-related routes
@@ -255,19 +258,14 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 		return RenderTempl(c, auth.Error("Failed to create token: "+err.Error()))
 	}
 
-	var baseURL string
-	baseURL = os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = "http://localhost:3000"
-	}
-
 	// send email with token
-	link := baseURL + "/reset-password?email=" + user.Email + "&token=" + tokenValue
+	link := a.Environment.BaseUrl + "/reset-password?email=" + user.Email + "&token=" + tokenValue
 	ej := jobs.EmailJob{
 		From:    "noreply@GoOnRails.com",
 		To:      user.Email,
 		Subject: "Reset your password",
 		Body:    "Click this link to reset your password: " + link,
+		Client:  a.MailjetClient,
 	}
 	jobs.AddToQueue(ej)
 

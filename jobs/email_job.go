@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/mailjet/mailjet-apiv3-go"
 )
@@ -12,6 +11,7 @@ type EmailJob struct {
 	To      string
 	Subject string
 	Body    string
+	Client  *mailjet.Client
 }
 
 func (e EmailJob) Execute() error {
@@ -23,17 +23,6 @@ func (e EmailJob) Execute() error {
 	if from == "" || to == "" || subject == "" || body == "" {
 		return fmt.Errorf("from, to, subject, and body are required")
 	}
-
-	// Initialize the Mailjet client
-	mjPublicKey, ok := os.LookupEnv("MJ_APIKEY_PUBLIC")
-	if !ok {
-		return fmt.Errorf("mj public key not found")
-	}
-	mjPrivateKey, ok := os.LookupEnv("MJ_APIKEY_PRIVATE")
-	if !ok {
-		return fmt.Errorf("mj private key not found")
-	}
-	mailjetClient := mailjet.NewMailjetClient(mjPublicKey, mjPrivateKey)
 
 	// Send the email
 	messagesInfo := []mailjet.InfoMessagesV31{
@@ -53,6 +42,6 @@ func (e EmailJob) Execute() error {
 		},
 	}
 	messages := mailjet.MessagesV31{Info: messagesInfo}
-	_, err := mailjetClient.SendMailV31(&messages)
+	_, err := e.Client.SendMailV31(&messages)
 	return err
 }

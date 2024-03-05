@@ -6,7 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/mailjet/mailjet-apiv3-go"
 	controllers "github.com/mauricedesaxe/go-on-rails/controllers"
+	"github.com/mauricedesaxe/go-on-rails/env"
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
 
@@ -17,12 +19,16 @@ import (
 )
 
 var sessionStore *session.Store
+var environment = env.Env{}
+var mailjetClient *mailjet.Client
 
 func init() {
 	storage := sqlite3.New() // From github.com/gofiber/storage/sqlite3
 	sessionStore = session.New(session.Config{
 		Storage: storage,
 	})
+	environment.Init(env.Config{UseDotEnv: true})
+	mailjetClient = mailjet.NewMailjetClient(environment.MjApiKeyPublic, environment.MjApiKeyPrivate)
 }
 
 func main() {
@@ -37,7 +43,7 @@ func main() {
 	registrars := []controllers.RouteRegistrar{
 		&controllers.Hello{},
 		&controllers.Posts{},
-		&controllers.AuthController{SessionStore: sessionStore},
+		&controllers.AuthController{SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
 	}
 
 	// Register routes for each registrar
