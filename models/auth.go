@@ -32,6 +32,12 @@ func (u *User) Create(database *gorm.DB) error {
 	return database.Create(u).Error
 }
 
+func (u *User) ReadAll(database *gorm.DB) ([]User, error) {
+	var users []User
+	err := database.Find(&users).Error
+	return users, err
+}
+
 func (u *User) Read(database *gorm.DB) error {
 	return database.First(u, u.ID).Error
 }

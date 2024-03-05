@@ -41,9 +41,9 @@ func (a *Auth) RegisterRoutes(app *fiber.App) {
 
 // GET /users/ - index - List all users
 func (a *Auth) index(c *fiber.Ctx) error {
-	var users []models.User
-	tx := a.Database.Find(&users)
-	if tx.Error != nil {
+	user := models.User{}
+	users, err := user.ReadAll(a.Database)
+	if err != nil {
 		return RenderTempl(c, auth.Error("No users found"))
 	}
 	return RenderTempl(c, auth.Index(users))
