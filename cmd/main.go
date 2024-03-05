@@ -31,6 +31,8 @@ func main() {
 
 	app.Use(fiberLogger.New())
 
+	app.Static("/static", "./public")
+
 	// Create a slice of route registrars
 	registrars := []controllers.RouteRegistrar{
 		&controllers.Hello{},
