@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -65,20 +66,14 @@ func (a *AuthController) show(c *fiber.Ctx) error {
 
 // GET /profile - profile - Show the profile of the logged in user
 func (a *AuthController) profile(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
+	// get user from session
+	userID, err := GetUserFromSession(c, a.SessionStore)
 	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
-	}
-
-	// get user id from session
-	userID := sess.Get("user_id")
-	if userID == nil {
-		return RenderTempl(c, auth_views.Error("You are not logged in"))
+		return RenderTempl(c, auth_views.Error(err.Error()))
 	}
 
 	// get user from database
-	user := models.UserModel{ID: userID.(uint)}
+	user := models.UserModel{ID: userID}
 	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth_views.Error("User not found"))
@@ -95,15 +90,9 @@ func (a *AuthController) login(c *fiber.Ctx) error {
 
 // POST /login - doLogin - Process the login form
 func (a *AuthController) doLogin(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
-	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
-	}
-
-	// check if user is already logged in
-	userID := sess.Get("user_id")
-	if userID != nil {
+	// get user from session
+	_, err := GetUserFromSession(c, a.SessionStore)
+	if err == nil { // If no error, user is already logged in
 		return c.Redirect("/profile")
 	}
 
@@ -121,10 +110,9 @@ func (a *AuthController) doLogin(c *fiber.Ctx) error {
 	}
 
 	// set user id in session
-	sess.Set("user_id", user.ID)
-	err = sess.Save()
+	err = SetUserInSession(c, a.SessionStore, user.ID)
 	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
+		return RenderTempl(c, auth_views.Error(err.Error()))
 	}
 
 	// redirect to profile
@@ -138,15 +126,9 @@ func (a *AuthController) signup(c *fiber.Ctx) error {
 
 // POST /signup - doSignup - Process the signup form
 func (a *AuthController) doSignup(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
-	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
-	}
-
-	// check if user is already logged in
-	userID := sess.Get("user_id")
-	if userID != nil {
+	// get user from session
+	_, err := GetUserFromSession(c, a.SessionStore)
+	if err == nil { // If no error, user is already logged in
 		return c.Redirect("/profile")
 	}
 
@@ -163,10 +145,9 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 	}
 
 	// set user id in session
-	sess.Set("user_id", user.ID)
-	err = sess.Save()
+	err = SetUserInSession(c, a.SessionStore, user.ID)
 	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
+		return RenderTempl(c, auth_views.Error(err.Error()))
 	}
 
 	// redirect to profile
@@ -175,20 +156,14 @@ func (a *AuthController) doSignup(c *fiber.Ctx) error {
 
 // GET /profile/edit - editProfile - Show the form to edit the profile of the logged in user
 func (a *AuthController) editProfile(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
+	// get user from session
+	userID, err := GetUserFromSession(c, a.SessionStore)
 	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
-	}
-
-	// get user id from session
-	userID := sess.Get("user_id")
-	if userID == nil {
-		return RenderTempl(c, auth_views.Error("You are not logged in"))
+		return RenderTempl(c, auth_views.Error(err.Error()))
 	}
 
 	// get user from database
-	user := models.UserModel{ID: userID.(uint)}
+	user := models.UserModel{ID: userID}
 	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth_views.Error("User not found"))
@@ -200,20 +175,14 @@ func (a *AuthController) editProfile(c *fiber.Ctx) error {
 
 // PUT /profile - updateProfile - Update the profile of the logged in user
 func (a *AuthController) updateProfile(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
+	// get user from session
+	userID, err := GetUserFromSession(c, a.SessionStore)
 	if err != nil {
-		return RenderTempl(c, auth_views.Error("Session error"))
-	}
-
-	// get user id from session
-	userID := sess.Get("user_id")
-	if userID == nil {
 		return RenderTempl(c, auth_views.Error("You are not logged in"))
 	}
 
 	// get user from database
-	user := models.UserModel{ID: userID.(uint)}
+	user := models.UserModel{ID: userID}
 	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth_views.Error("User not found"))
@@ -329,19 +298,68 @@ func (a *AuthController) doResetPassword(c *fiber.Ctx) error {
 
 // GET /logout - logout - Log the user out
 func (a *AuthController) logout(c *fiber.Ctx) error {
-	// get session
-	sess, err := a.SessionStore.Get(c)
+	// get user from session
+	_, err := GetUserFromSession(c, a.SessionStore)
 	if err != nil {
 		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// remove user id from session
-	sess.Delete("user_id")
-	err = sess.Save()
+	err = DeleteUserFromSession(c, a.SessionStore)
 	if err != nil {
 		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// redirect to login
 	return c.Redirect("/login")
+}
+
+// Helper function to get the user from the session, if the user is not logged in, an error is returned.
+func GetUserFromSession(c *fiber.Ctx, sessionStore *session.Store) (uint, error) {
+	// get session
+	sess, err := sessionStore.Get(c)
+	if err != nil {
+		return 0, errors.New("session error")
+	}
+
+	// get user id from session
+	userID := sess.Get("user_id")
+	if userID == nil {
+		return 0, errors.New("you are not logged in")
+	}
+	return userID.(uint), nil
+}
+
+// Helper function to set the user in the session
+func SetUserInSession(c *fiber.Ctx, sessionStore *session.Store, userID uint) error {
+	// get session
+	sess, err := sessionStore.Get(c)
+	if err != nil {
+		return errors.New("session error")
+	}
+
+	// set user id in session
+	sess.Set("user_id", userID)
+	err = sess.Save()
+	if err != nil {
+		return errors.New("session error")
+	}
+	return nil
+}
+
+// Helper function to delete the user from the session
+func DeleteUserFromSession(c *fiber.Ctx, sessionStore *session.Store) error {
+	// get session
+	sess, err := sessionStore.Get(c)
+	if err != nil {
+		return errors.New("session error")
+	}
+
+	// remove user id from session
+	sess.Delete("user_id")
+	err = sess.Save()
+	if err != nil {
+		return errors.New("session error")
+	}
+	return nil
 }
