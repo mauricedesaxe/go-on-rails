@@ -9,12 +9,12 @@ import (
 	"github.com/mauricedesaxe/go-on-rails/env"
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
-	"github.com/mauricedesaxe/go-on-rails/views/auth"
+	auth_views "github.com/mauricedesaxe/go-on-rails/views/auth"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type Auth struct {
+type AuthController struct {
 	Database      *gorm.DB
 	SessionStore  *session.Store
 	Environment   *env.Env
@@ -22,7 +22,7 @@ type Auth struct {
 }
 
 // RegisterRoutes registers the auth-related routes
-func (a *Auth) RegisterRoutes(app *fiber.App) {
+func (a *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/users", a.index)
 	app.Get("/users/:id", a.show)
 	app.Get("/profile", a.profile)
@@ -40,65 +40,65 @@ func (a *Auth) RegisterRoutes(app *fiber.App) {
 }
 
 // GET /users/ - index - List all users
-func (a *Auth) index(c *fiber.Ctx) error {
-	user := models.User{}
+func (a *AuthController) index(c *fiber.Ctx) error {
+	user := models.UserModel{}
 	users, err := user.ReadAll(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("No users found"))
+		return RenderTempl(c, auth_views.Error("No users found"))
 	}
-	return RenderTempl(c, auth.Index(users))
+	return RenderTempl(c, auth_views.Index(users))
 }
 
 // GET /users/:id - show - Show a single user
-func (a *Auth) show(c *fiber.Ctx) error {
+func (a *AuthController) show(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return RenderTempl(c, auth.Error("Invalid ID format"))
+		return RenderTempl(c, auth_views.Error("Invalid ID format"))
 	}
-	user := models.User{ID: uint(id)}
+	user := models.UserModel{ID: uint(id)}
 	err = user.Read(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
-	return RenderTempl(c, auth.Show(user))
+	return RenderTempl(c, auth_views.Show(user))
 }
 
 // GET /profile - profile - Show the profile of the logged in user
-func (a *Auth) profile(c *fiber.Ctx) error {
+func (a *AuthController) profile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.Error("You are not logged in"))
+		return RenderTempl(c, auth_views.Error("You are not logged in"))
 	}
 
 	// get user from database
-	user := models.User{ID: userID.(uint)}
+	user := models.UserModel{ID: userID.(uint)}
 	err = user.Read(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// render the profile
-	return RenderTempl(c, auth.Profile(user))
+	return RenderTempl(c, auth_views.Profile(user))
 }
 
 // GET /login - login - Show the login form
-func (a *Auth) login(c *fiber.Ctx) error {
-	return RenderTempl(c, auth.Login())
+func (a *AuthController) login(c *fiber.Ctx) error {
+	return RenderTempl(c, auth_views.Login())
 }
 
 // POST /login - doLogin - Process the login form
-func (a *Auth) doLogin(c *fiber.Ctx) error {
+func (a *AuthController) doLogin(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// check if user is already logged in
@@ -108,23 +108,23 @@ func (a *Auth) doLogin(c *fiber.Ctx) error {
 	}
 
 	// get user from database
-	user := models.User{Email: c.FormValue("email")}
+	user := models.UserModel{Email: c.FormValue("email")}
 	err = user.ReadByEmail(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.FormValue("password")))
 	if err != nil {
-		return RenderTempl(c, auth.Error("Invalid password"))
+		return RenderTempl(c, auth_views.Error("Invalid password"))
 	}
 
 	// set user id in session
 	sess.Set("user_id", user.ID)
 	err = sess.Save()
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// redirect to profile
@@ -132,16 +132,16 @@ func (a *Auth) doLogin(c *fiber.Ctx) error {
 }
 
 // GET /signup - signup - Show the signup form
-func (a *Auth) signup(c *fiber.Ctx) error {
-	return RenderTempl(c, auth.Signup())
+func (a *AuthController) signup(c *fiber.Ctx) error {
+	return RenderTempl(c, auth_views.Signup())
 }
 
 // POST /signup - doSignup - Process the signup form
-func (a *Auth) doSignup(c *fiber.Ctx) error {
+func (a *AuthController) doSignup(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// check if user is already logged in
@@ -151,7 +151,7 @@ func (a *Auth) doSignup(c *fiber.Ctx) error {
 	}
 
 	// create a new user
-	user := models.User{
+	user := models.UserModel{
 		Email:    c.FormValue("email"),
 		Password: c.FormValue("password"),
 	}
@@ -159,14 +159,14 @@ func (a *Auth) doSignup(c *fiber.Ctx) error {
 	// save the user
 	err = user.Create(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to create user: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to create user: "+err.Error()))
 	}
 
 	// set user id in session
 	sess.Set("user_id", user.ID)
 	err = sess.Save()
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// redirect to profile
@@ -174,49 +174,49 @@ func (a *Auth) doSignup(c *fiber.Ctx) error {
 }
 
 // GET /profile/edit - editProfile - Show the form to edit the profile of the logged in user
-func (a *Auth) editProfile(c *fiber.Ctx) error {
+func (a *AuthController) editProfile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.Error("You are not logged in"))
+		return RenderTempl(c, auth_views.Error("You are not logged in"))
 	}
 
 	// get user from database
-	user := models.User{ID: userID.(uint)}
+	user := models.UserModel{ID: userID.(uint)}
 	err = user.Read(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// render the edit profile form
-	return RenderTempl(c, auth.EditProfile(user))
+	return RenderTempl(c, auth_views.EditProfile(user))
 }
 
 // PUT /profile - updateProfile - Update the profile of the logged in user
-func (a *Auth) updateProfile(c *fiber.Ctx) error {
+func (a *AuthController) updateProfile(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.Error("You are not logged in"))
+		return RenderTempl(c, auth_views.Error("You are not logged in"))
 	}
 
 	// get user from database
-	user := models.User{ID: userID.(uint)}
+	user := models.UserModel{ID: userID.(uint)}
 	err = user.Read(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// update user
@@ -230,7 +230,7 @@ func (a *Auth) updateProfile(c *fiber.Ctx) error {
 	// save the user
 	err = user.Update(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to update user: "+err.Error()))
 	}
 
 	// redirect to profile
@@ -238,26 +238,26 @@ func (a *Auth) updateProfile(c *fiber.Ctx) error {
 }
 
 // GET /forgot-password - forgotPassword - Show the forgot password form
-func (a *Auth) forgotPassword(c *fiber.Ctx) error {
-	return RenderTempl(c, auth.ForgotPassword())
+func (a *AuthController) forgotPassword(c *fiber.Ctx) error {
+	return RenderTempl(c, auth_views.ForgotPassword())
 }
 
 // POST /forgot-password - doForgotPassword - Process the forgot password form
-func (a *Auth) doForgotPassword(c *fiber.Ctx) error {
+func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 	// get user from database
-	user := models.User{Email: c.FormValue("email")}
+	user := models.UserModel{Email: c.FormValue("email")}
 	err := user.ReadByEmail(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// create a token
-	token := models.Token{
+	token := models.TokenModel{
 		Email: user.Email,
 	}
 	tokenValue, err := token.Create(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to create token: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to create token: "+err.Error()))
 	}
 
 	// send email with token
@@ -277,50 +277,50 @@ func (a *Auth) doForgotPassword(c *fiber.Ctx) error {
 }
 
 // GET /reset-password - resetPassword - Show the reset password form
-func (a *Auth) resetPassword(c *fiber.Ctx) error {
+func (a *AuthController) resetPassword(c *fiber.Ctx) error {
 	email := c.Query("email")
 	tokenValue := c.Query("token")
-	return RenderTempl(c, auth.ResetPassword(email, tokenValue))
+	return RenderTempl(c, auth_views.ResetPassword(email, tokenValue))
 }
 
 // PUT /reset-password - doResetPassword - Process the reset password form
-func (a *Auth) doResetPassword(c *fiber.Ctx) error {
+func (a *AuthController) doResetPassword(c *fiber.Ctx) error {
 	// get user from database
-	user := models.User{Email: c.FormValue("email")}
+	user := models.UserModel{Email: c.FormValue("email")}
 	err := user.ReadByEmail(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("User not found"))
+		return RenderTempl(c, auth_views.Error("User not found"))
 	}
 
 	// get token from database
-	token := models.Token{
+	token := models.TokenModel{
 		Email: user.Email,
 	}
 	err = token.Read(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("No valid tokens were found for this email, please request a new one"))
+		return RenderTempl(c, auth_views.Error("No valid tokens were found for this email, please request a new one"))
 	}
 
 	// validate token value
 	hashedToken, err := models.Hash(c.FormValue("token"))
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to hash input token: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to hash input token: "+err.Error()))
 	}
 	if hashedToken != token.Value {
-		return RenderTempl(c, auth.Error("Invalid token"))
+		return RenderTempl(c, auth_views.Error("Invalid token"))
 	}
 
 	// update user password
 	user.Password = c.FormValue("password")
 	err = user.Update(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to update user: "+err.Error()))
 	}
 
 	// delete token
 	err = token.Delete(a.Database)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Failed to delete token: "+err.Error()))
+		return RenderTempl(c, auth_views.Error("Failed to delete token: "+err.Error()))
 	}
 
 	// redirect to login
@@ -328,18 +328,18 @@ func (a *Auth) doResetPassword(c *fiber.Ctx) error {
 }
 
 // GET /logout - logout - Log the user out
-func (a *Auth) logout(c *fiber.Ctx) error {
+func (a *AuthController) logout(c *fiber.Ctx) error {
 	// get session
 	sess, err := a.SessionStore.Get(c)
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// remove user id from session
 	sess.Delete("user_id")
 	err = sess.Save()
 	if err != nil {
-		return RenderTempl(c, auth.Error("Session error"))
+		return RenderTempl(c, auth_views.Error("Session error"))
 	}
 
 	// redirect to login

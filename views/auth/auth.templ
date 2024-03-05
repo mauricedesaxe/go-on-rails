@@ -1,6 +1,6 @@
 
 
-package auth
+package auth_views
 
 import (
 	"github.com/mauricedesaxe/go-on-rails/views/layout"
@@ -9,8 +9,8 @@ import (
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
-templ Index(users []models.User) {
-    @layout.Base() {
+templ Index(users []models.UserModel) {
+    @layout_views.Base() {
         <h1 class="text-2xl font-bold">Users</h1>
         <table class="table-auto my-4">
             <thead>
@@ -31,16 +31,16 @@ templ Index(users []models.User) {
     }
 }
 
-templ Show(user models.User) {
-    @layout.Base() {
+templ Show(user models.UserModel) {
+    @layout_views.Base() {
         <h1 class="text-2xl font-bold">{ user.Email }</h1>
         <p class="my-4">Created At: { user.CreatedAt.Format("2006-01-02") }</p>
         <p class="my-4"><a class="text-blue-600 hover:underline" href="/users">Back to all users</a></p>
     }
 }
 
-templ Profile(user models.User) {
-    @layout.Base() {
+templ Profile(user models.UserModel) {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">You are logged in as { user.Email }</h1>
             <p class="my-4">{ user.Email }</p>
@@ -51,7 +51,7 @@ templ Profile(user models.User) {
 }
 
 templ Login() {
-    @layout.Base() {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Login</h1>
             <form class="my-4" action="/login" method="post">
@@ -65,8 +65,8 @@ templ Login() {
     }
 }
 
-templ EditProfile(user models.User) {
-    @layout.Base() {
+templ EditProfile(user models.UserModel) {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Edit Profile</h1>
             <form class="my-4" action="/profile" method="put">
@@ -80,7 +80,7 @@ templ EditProfile(user models.User) {
 }
 
 templ Signup() {
-    @layout.Base() {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Signup</h1>
             <form class="my-4" action="/signup" method="post">
@@ -94,7 +94,7 @@ templ Signup() {
 }
 
 templ ForgotPassword() {
-    @layout.Base() {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Forgot Password</h1>
             <form class="my-4" action="/forgot-password" method="post">
@@ -107,7 +107,7 @@ templ ForgotPassword() {
 }
 
 templ ResetPassword(email string, token string) {
-    @layout.Base() {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Reset Password</h1>
             <form class="my-4" action="/reset-password" method="put">
@@ -121,7 +121,7 @@ templ ResetPassword(email string, token string) {
 }
 
 templ Error(msg string) {
-    @layout.Base() {
+    @layout_views.Base() {
         <div class="text-center">
             <h1 class="text-2xl font-bold">Unexpected error</h1>
             <div class="max-w-2xl mx-auto bg-red-100 border border-red-400 text-red-700 my-4 px-4 py-3 rounded relative" role="alert">

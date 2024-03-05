@@ -43,9 +43,9 @@ func main() {
 
 	// Create a slice of route registrars
 	registrars := []controllers.RouteRegistrar{
-		&controllers.Hello{},
-		&controllers.Posts{Database: database},
-		&controllers.Auth{Database: database, SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
+		&controllers.HelloController{},
+		&controllers.PostsController{Database: database},
+		&controllers.AuthController{Database: database, SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
 	}
 
 	// Register routes for each registrar

@@ -1,6 +1,6 @@
 
 
-package posts
+package posts_views
 
 import (
 	"github.com/mauricedesaxe/go-on-rails/views/layout"
@@ -8,8 +8,8 @@ import (
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
-templ Index(posts []models.Post) {
-	@layout.Base() {
+templ Index(posts []models.PostModel) {
+	@layout_views.Base() {
 	 <ul>
         for _, post := range posts {
             <li>{ post.Title }</li>
@@ -19,8 +19,8 @@ templ Index(posts []models.Post) {
 	}
 }
 
-templ Show(post models.Post) {
-    @layout.Base() {
+templ Show(post models.PostModel) {
+    @layout_views.Base() {
         <h1>{ post.Title }</h1>
         <p>By { post.Author }</p>
         <p>{ post.Content }</p>
@@ -28,7 +28,7 @@ templ Show(post models.Post) {
 }
 
 templ New() {
-    @layout.Base() {
+    @layout_views.Base() {
         <h1>New post</h1>
         <form action="/posts" method="post">
             <p>
@@ -50,8 +50,8 @@ templ New() {
     }
 }
 
-templ Edit(post models.Post) {
-    @layout.Base() {
+templ Edit(post models.PostModel) {
+    @layout_views.Base() {
         <h1>Edit post</h1>
         <form action="/posts/{ post.Id }" method="post">
             <input type="hidden" name="_method" value="put"/>
@@ -75,7 +75,7 @@ templ Edit(post models.Post) {
 }
 
 templ Error(msg string) {
-    @layout.Base() {
+    @layout_views.Base() {
         <h1>Unexpected error</h1>
         <p>{ msg }</p>
     }

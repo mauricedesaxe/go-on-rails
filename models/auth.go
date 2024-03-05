@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
+type UserModel struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey"`
 	Email    string `gorm:"unique"`
@@ -19,54 +19,54 @@ type User struct {
 }
 
 // Note that this hashes the password before storing the user.
-func (u *User) Create(database *gorm.DB) error {
-	err := ValidateUserInput(u)
+func (model *UserModel) Create(database *gorm.DB) error {
+	err := ValidateUserInput(model)
 	if err != nil {
 		return err
 	}
-	hashed, err := Hash(u.Password)
+	hashed, err := Hash(model.Password)
 	if err != nil {
 		return err
 	}
-	u.Password = hashed
-	return database.Create(u).Error
+	model.Password = hashed
+	return database.Create(model).Error
 }
 
-func (u *User) ReadAll(database *gorm.DB) ([]User, error) {
-	var users []User
+func (model *UserModel) ReadAll(database *gorm.DB) ([]UserModel, error) {
+	var users []UserModel
 	err := database.Find(&users).Error
 	return users, err
 }
 
-func (u *User) Read(database *gorm.DB) error {
-	return database.First(u, u.ID).Error
+func (model *UserModel) Read(database *gorm.DB) error {
+	return database.First(model, model.ID).Error
 }
 
-func (u *User) ReadByEmail(database *gorm.DB) error {
-	return database.Where("email = ?", u.Email).First(u).Error
+func (model *UserModel) ReadByEmail(database *gorm.DB) error {
+	return database.Where("email = ?", model.Email).First(model).Error
 }
 
 // Note that this hashes the password before storing the user.
-func (u *User) Update(database *gorm.DB) error {
-	err := ValidateUserInput(u)
+func (model *UserModel) Update(database *gorm.DB) error {
+	err := ValidateUserInput(model)
 	if err != nil {
 		return err
 	}
-	hashed, err := Hash(u.Password)
+	hashed, err := Hash(model.Password)
 	if err != nil {
 		return err
 	}
-	u.Password = hashed
-	return database.Save(u).Error
+	model.Password = hashed
+	return database.Save(model).Error
 }
 
-func (u *User) Delete(database *gorm.DB) error {
-	return database.Delete(u).Error
+func (model *UserModel) Delete(database *gorm.DB) error {
+	return database.Delete(model).Error
 }
 
 // Can help with email verification, password reset and magic link login. It's meant as a way to
 // verify that the user has access to the email of the account.
-type Token struct {
+type TokenModel struct {
 	gorm.Model
 	Email string `gorm:"primaryKey"`
 	Value string `gorm:"primaryKey"`
@@ -74,9 +74,9 @@ type Token struct {
 
 // Note that this hashes the token value before storing the token. The unhashed value is returned for
 // use in the email link.
-func (t *Token) Create(database *gorm.DB) (string, error) {
+func (model *TokenModel) Create(database *gorm.DB) (string, error) {
 	// Validate the email
-	_, err := mail.ParseAddress(t.Email)
+	_, err := mail.ParseAddress(model.Email)
 	if err != nil {
 		return "", errors.New("invalid email address")
 	}
@@ -100,31 +100,31 @@ func (t *Token) Create(database *gorm.DB) (string, error) {
 	}
 
 	// Store the hashed string and return the unhashed string for use in the email link
-	t.Value = hashed
-	return val, database.Create(t).Error
+	model.Value = hashed
+	return val, database.Create(model).Error
 }
 
 // Reads a token by email where CreatedAt is no older than 24 hours.
 // You're meant to check the read value against another hashed value to verify the token.
-func (t *Token) Read(database *gorm.DB) error {
-	return database.First(t, "email = ? AND created_at > ?", t.Email, time.Now().Add(-24*time.Hour)).Error
+func (model *TokenModel) Read(database *gorm.DB) error {
+	return database.First(model, "email = ? AND created_at > ?", model.Email, time.Now().Add(-24*time.Hour)).Error
 }
 
 // Delete deletes a token by email and value.
-func (t *Token) Delete(database *gorm.DB) error {
-	return database.Delete(t, "email = ? AND value = ?", t.Email, t.Value).Error
+func (model *TokenModel) Delete(database *gorm.DB) error {
+	return database.Delete(model, "email = ? AND value = ?", model.Email, model.Value).Error
 }
 
 // ValidateUserInput checks if the user input meets the requirements.
-func ValidateUserInput(u *User) error {
-	_, err := mail.ParseAddress(u.Email)
+func ValidateUserInput(user *UserModel) error {
+	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
 		return errors.New("invalid email address")
 	}
-	if len(u.Password) < 16 {
+	if len(user.Password) < 16 {
 		return errors.New("password too short, must be at least 16 characters")
 	}
-	if len(u.Password) > 128 {
+	if len(user.Password) > 128 {
 		return errors.New("password too long, must be at most 128 characters")
 	}
 	// check password to have a mix of upper/lower case, numbers and special characters
@@ -132,7 +132,7 @@ func ValidateUserInput(u *User) error {
 	lower := false
 	number := false
 	special := false
-	for _, c := range u.Password {
+	for _, c := range user.Password {
 		switch {
 		case 'A' <= c && c <= 'Z':
 			upper = true
