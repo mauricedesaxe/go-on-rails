@@ -19,10 +19,10 @@ templ Index(posts []models.PostModel) {
 	}
 }
 
-templ Show(post models.PostModel) {
+templ Show(post models.PostModel, author models.UserModel) {
     @layout_views.Base() {
         <h1>{ post.Title }</h1>
-        <p>By { post.Author }</p>
+        <p>By { author.Email }</p>
         <p>{ post.Content }</p>
     }
 }

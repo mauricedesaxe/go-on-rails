@@ -11,7 +11,7 @@ type PostModel struct {
 	ID        uint   `gorm:"primaryKey"`
 	Title     string `gorm:"type:varchar(100);not null"`
 	Content   string `gorm:"type:text;not null"`
-	Author    string `gorm:"type:varchar(100);not null"`
+	AuthorID  uint   `gorm:"type:integer;not null"`
 	Published bool   `gorm:"type:boolean;default:false"`
 }
 
@@ -50,9 +50,6 @@ func validatePostInput(post *PostModel) error {
 	}
 	if post.Content == "" {
 		return errors.New("content cannot be empty")
-	}
-	if post.Author == "" || len(post.Author) > 100 {
-		return errors.New("invalid author")
 	}
 	return nil
 }

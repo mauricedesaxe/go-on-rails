@@ -9,10 +9,12 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type PostsController struct {
-	Database *gorm.DB
+	Database     *gorm.DB
+	SessionStore *session.Store
 } // Implements RouteRegistrar and CoreHandler
 
 func (ctrl *PostsController) RegisterRoutes(app *fiber.App) {
@@ -48,7 +50,13 @@ func (ctrl *PostsController) show(c *fiber.Ctx) error {
 		return RenderTempl(c, posts_views.Error("Post not found"))
 	}
 
-	return RenderTempl(c, posts_views.Show(post))
+	author := models.UserModel{ID: post.AuthorID}
+	err = author.Read(ctrl.Database)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("Author not found"))
+	}
+
+	return RenderTempl(c, posts_views.Show(post, author))
 }
 
 // GET /posts/new - new - Show the form to create a new post
@@ -67,13 +75,19 @@ func (ctrl *PostsController) create(c *fiber.Ctx) error {
 		return RenderTempl(c, posts_views.Error("Title, content, and author are required"))
 	}
 
+	// Get user from session
+	userID, err := GetUserFromSession(c, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("You must be logged in to create a post"))
+	}
+
 	// Create a new post.
 	post := models.PostModel{
-		Title:   title,
-		Content: content,
-		Author:  author,
+		Title:    title,
+		Content:  content,
+		AuthorID: userID,
 	}
-	err := post.Create(ctrl.Database)
+	err = post.Create(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to create post"))
 	}
@@ -89,6 +103,13 @@ func (ctrl *PostsController) edit(c *fiber.Ctx) error {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
+	// Get user from session
+	_, err = GetUserFromSession(c, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("You must be logged in to edit a post"))
+	}
+
+	// Find the post by ID.
 	post := models.PostModel{ID: uint(id)}
 	err = post.Read(ctrl.Database)
 	if err != nil {
@@ -106,24 +127,35 @@ func (ctrl *PostsController) update(c *fiber.Ctx) error {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
+	// Get user from session
+	userId, err := GetUserFromSession(c, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("You must be logged in to edit a post"))
+	}
+
+	// Find the post by ID.
+	post := models.PostModel{ID: uint(id)}
+	err = post.Read(ctrl.Database)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("Post not found"))
+	}
+
+	// Ensure that the user is the author of the post.
+	if post.AuthorID != userId {
+		return RenderTempl(c, posts_views.Error("You are not the author of this post"))
+	}
+
+	// Update the post fields locally if they are provided.
 	title := c.FormValue("title")
 	content := c.FormValue("content")
-	author := c.FormValue("author")
-
-	post := models.PostModel{ID: uint(id)}
-
-	// Update the post fields if they are provided.
 	if title != "" {
 		post.Title = title
 	}
 	if content != "" {
 		post.Content = content
 	}
-	if author != "" {
-		post.Author = author
-	}
 
-	// Save the updated post.
+	// Save the updated post to the database.
 	err = post.Update(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to update post"))
@@ -140,7 +172,25 @@ func (ctrl *PostsController) delete(c *fiber.Ctx) error {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
+	// Get user from session
+	userId, err := GetUserFromSession(c, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("You must be logged in to delete a post"))
+	}
+
+	// Find the post by ID.
 	post := models.PostModel{ID: uint(id)}
+	err = post.Read(ctrl.Database)
+	if err != nil {
+		return RenderTempl(c, posts_views.Error("Post not found"))
+	}
+
+	// Ensure that the user is the author of the post.
+	if post.AuthorID != userId {
+		return RenderTempl(c, posts_views.Error("You are not the author of this post"))
+	}
+
+	// Delete the post from the database.
 	err = post.Delete(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to delete post"))
