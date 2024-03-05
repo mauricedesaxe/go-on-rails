@@ -19,7 +19,7 @@ type User struct {
 }
 
 // Note that this hashes the password before storing the user.
-func (u *User) Create() error {
+func (u *User) Create(database *gorm.DB) error {
 	err := ValidateUserInput(u)
 	if err != nil {
 		return err
@@ -29,19 +29,19 @@ func (u *User) Create() error {
 		return err
 	}
 	u.Password = hashed
-	return DB.Create(u).Error
+	return database.Create(u).Error
 }
 
-func (u *User) Read() error {
-	return DB.First(u, u.ID).Error
+func (u *User) Read(database *gorm.DB) error {
+	return database.First(u, u.ID).Error
 }
 
-func (u *User) ReadByEmail() error {
-	return DB.Where("email = ?", u.Email).First(u).Error
+func (u *User) ReadByEmail(database *gorm.DB) error {
+	return database.Where("email = ?", u.Email).First(u).Error
 }
 
 // Note that this hashes the password before storing the user.
-func (u *User) Update() error {
+func (u *User) Update(database *gorm.DB) error {
 	err := ValidateUserInput(u)
 	if err != nil {
 		return err
@@ -51,11 +51,11 @@ func (u *User) Update() error {
 		return err
 	}
 	u.Password = hashed
-	return DB.Save(u).Error
+	return database.Save(u).Error
 }
 
-func (u *User) Delete() error {
-	return DB.Delete(u).Error
+func (u *User) Delete(database *gorm.DB) error {
+	return database.Delete(u).Error
 }
 
 // Can help with email verification, password reset and magic link login. It's meant as a way to
@@ -68,7 +68,7 @@ type Token struct {
 
 // Note that this hashes the token value before storing the token. The unhashed value is returned for
 // use in the email link.
-func (t *Token) Create() (string, error) {
+func (t *Token) Create(database *gorm.DB) (string, error) {
 	// Validate the email
 	_, err := mail.ParseAddress(t.Email)
 	if err != nil {
@@ -95,18 +95,18 @@ func (t *Token) Create() (string, error) {
 
 	// Store the hashed string and return the unhashed string for use in the email link
 	t.Value = hashed
-	return val, DB.Create(t).Error
+	return val, database.Create(t).Error
 }
 
 // Reads a token by email where CreatedAt is no older than 24 hours.
 // You're meant to check the read value against another hashed value to verify the token.
-func (t *Token) Read() error {
-	return DB.First(t, "email = ? AND created_at > ?", t.Email, time.Now().Add(-24*time.Hour)).Error
+func (t *Token) Read(database *gorm.DB) error {
+	return database.First(t, "email = ? AND created_at > ?", t.Email, time.Now().Add(-24*time.Hour)).Error
 }
 
 // Delete deletes a token by email and value.
-func (t *Token) Delete() error {
-	return DB.Delete(t, "email = ? AND value = ?", t.Email, t.Value).Error
+func (t *Token) Delete(database *gorm.DB) error {
+	return database.Delete(t, "email = ? AND value = ?", t.Email, t.Value).Error
 }
 
 // ValidateUserInput checks if the user input meets the requirements.

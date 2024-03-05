@@ -5,8 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 func InitDB(dest string) *gorm.DB {
 	var err error
 	db, err := gorm.Open(sqlite.Open(dest), &gorm.Config{})

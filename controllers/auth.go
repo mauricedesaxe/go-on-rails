@@ -11,9 +11,11 @@ import (
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	"github.com/mauricedesaxe/go-on-rails/views/auth"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Auth struct {
+	Database      *gorm.DB
 	SessionStore  *session.Store
 	Environment   *env.Env
 	MailjetClient *mailjet.Client
@@ -40,7 +42,7 @@ func (a *Auth) RegisterRoutes(app *fiber.App) {
 // GET /users/ - index - List all users
 func (a *Auth) index(c *fiber.Ctx) error {
 	var users []models.User
-	tx := models.DB.Find(&users)
+	tx := a.Database.Find(&users)
 	if tx.Error != nil {
 		return RenderTempl(c, auth.Error("No users found"))
 	}
@@ -54,7 +56,7 @@ func (a *Auth) show(c *fiber.Ctx) error {
 		return RenderTempl(c, auth.Error("Invalid ID format"))
 	}
 	user := models.User{ID: uint(id)}
-	err = user.Read()
+	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -77,7 +79,7 @@ func (a *Auth) profile(c *fiber.Ctx) error {
 
 	// get user from database
 	user := models.User{ID: userID.(uint)}
-	err = user.Read()
+	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -107,7 +109,7 @@ func (a *Auth) doLogin(c *fiber.Ctx) error {
 
 	// get user from database
 	user := models.User{Email: c.FormValue("email")}
-	err = user.ReadByEmail()
+	err = user.ReadByEmail(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -155,7 +157,7 @@ func (a *Auth) doSignup(c *fiber.Ctx) error {
 	}
 
 	// save the user
-	err = user.Create()
+	err = user.Create(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("Failed to create user: "+err.Error()))
 	}
@@ -187,7 +189,7 @@ func (a *Auth) editProfile(c *fiber.Ctx) error {
 
 	// get user from database
 	user := models.User{ID: userID.(uint)}
-	err = user.Read()
+	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -212,7 +214,7 @@ func (a *Auth) updateProfile(c *fiber.Ctx) error {
 
 	// get user from database
 	user := models.User{ID: userID.(uint)}
-	err = user.Read()
+	err = user.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -226,7 +228,7 @@ func (a *Auth) updateProfile(c *fiber.Ctx) error {
 	}
 
 	// save the user
-	err = user.Update()
+	err = user.Update(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
 	}
@@ -244,7 +246,7 @@ func (a *Auth) forgotPassword(c *fiber.Ctx) error {
 func (a *Auth) doForgotPassword(c *fiber.Ctx) error {
 	// get user from database
 	user := models.User{Email: c.FormValue("email")}
-	err := user.ReadByEmail()
+	err := user.ReadByEmail(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -253,7 +255,7 @@ func (a *Auth) doForgotPassword(c *fiber.Ctx) error {
 	token := models.Token{
 		Email: user.Email,
 	}
-	tokenValue, err := token.Create()
+	tokenValue, err := token.Create(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("Failed to create token: "+err.Error()))
 	}
@@ -285,7 +287,7 @@ func (a *Auth) resetPassword(c *fiber.Ctx) error {
 func (a *Auth) doResetPassword(c *fiber.Ctx) error {
 	// get user from database
 	user := models.User{Email: c.FormValue("email")}
-	err := user.ReadByEmail()
+	err := user.ReadByEmail(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("User not found"))
 	}
@@ -294,7 +296,7 @@ func (a *Auth) doResetPassword(c *fiber.Ctx) error {
 	token := models.Token{
 		Email: user.Email,
 	}
-	err = token.Read()
+	err = token.Read(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("No valid tokens were found for this email, please request a new one"))
 	}
@@ -310,13 +312,13 @@ func (a *Auth) doResetPassword(c *fiber.Ctx) error {
 
 	// update user password
 	user.Password = c.FormValue("password")
-	err = user.Update()
+	err = user.Update(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("Failed to update user: "+err.Error()))
 	}
 
 	// delete token
-	err = token.Delete()
+	err = token.Delete(a.Database)
 	if err != nil {
 		return RenderTempl(c, auth.Error("Failed to delete token: "+err.Error()))
 	}

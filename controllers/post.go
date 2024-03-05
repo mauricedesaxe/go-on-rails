@@ -6,11 +6,14 @@ import (
 
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	"github.com/mauricedesaxe/go-on-rails/views/posts"
+	"gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type Posts struct{} // Implements RouteRegistrar and CoreHandler
+type Posts struct {
+	Database *gorm.DB
+} // Implements RouteRegistrar and CoreHandler
 
 func (h *Posts) RegisterRoutes(app *fiber.App) {
 	app.Get("/posts", h.index)
@@ -25,7 +28,7 @@ func (h *Posts) RegisterRoutes(app *fiber.App) {
 // GET /posts - index - List all posts
 func (h *Posts) index(c *fiber.Ctx) error {
 	var rows []models.Post
-	tx := models.DB.Find(&rows)
+	tx := h.Database.Find(&rows)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("No posts found"))
 	}
@@ -40,7 +43,7 @@ func (h *Posts) show(c *fiber.Ctx) error {
 	}
 
 	var res models.Post
-	tx := models.DB.First(&res, id)
+	tx := h.Database.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -72,7 +75,7 @@ func (h *Posts) create(c *fiber.Ctx) error {
 	}
 
 	// Save the new post.
-	tx := models.DB.Create(&post)
+	tx := h.Database.Create(&post)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to create post"))
 	}
@@ -89,7 +92,7 @@ func (h *Posts) edit(c *fiber.Ctx) error {
 	}
 
 	var res models.Post
-	tx := models.DB.First(&res, id)
+	tx := h.Database.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -107,7 +110,7 @@ func (h *Posts) update(c *fiber.Ctx) error {
 
 	// Find the post to update.
 	var res models.Post
-	tx := models.DB.First(&res, id)
+	tx := h.Database.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
@@ -128,7 +131,7 @@ func (h *Posts) update(c *fiber.Ctx) error {
 	}
 
 	// Save the updated post.
-	tx = models.DB.Save(res)
+	tx = h.Database.Save(res)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to update post"))
 	}
@@ -145,12 +148,12 @@ func (h *Posts) delete(c *fiber.Ctx) error {
 	}
 
 	var res models.Post
-	tx := models.DB.First(&res, id)
+	tx := h.Database.First(&res, id)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	tx = models.DB.Delete(&res)
+	tx = h.Database.Delete(&res)
 	if tx.Error != nil {
 		return RenderTempl(c, posts.Error("Failed to delete post"))
 	}

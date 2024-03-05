@@ -11,6 +11,7 @@ import (
 	"github.com/mauricedesaxe/go-on-rails/env"
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
+	"gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
@@ -18,13 +19,14 @@ import (
 	"github.com/gofiber/storage/sqlite3"
 )
 
+var database *gorm.DB
 var sessionStore *session.Store
 var environment = env.Env{}
 var mailjetClient *mailjet.Client
 
 func init() {
+	database = models.InitDB("store.db")
 	storage := sqlite3.New() // From github.com/gofiber/storage/sqlite3
-	models.DB = models.InitDB("store.db")
 	sessionStore = session.New(session.Config{
 		Storage: storage,
 	})
@@ -42,8 +44,8 @@ func main() {
 	// Create a slice of route registrars
 	registrars := []controllers.RouteRegistrar{
 		&controllers.Hello{},
-		&controllers.Posts{},
-		&controllers.Auth{SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
+		&controllers.Posts{Database: database},
+		&controllers.Auth{Database: database, SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
 	}
 
 	// Register routes for each registrar
