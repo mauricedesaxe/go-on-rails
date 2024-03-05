@@ -271,8 +271,8 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 	}
 	jobs.AddToQueue(ej)
 
-	// redirect to login
-	return c.Redirect("/login")
+	// redirect to reset password
+	return c.Redirect("/reset-password")
 }
 
 // GET /reset-password - resetPassword - Show the reset password form
