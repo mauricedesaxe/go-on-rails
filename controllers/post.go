@@ -15,35 +15,35 @@ type PostsController struct {
 	Database *gorm.DB
 } // Implements RouteRegistrar and CoreHandler
 
-func (h *PostsController) RegisterRoutes(app *fiber.App) {
-	app.Get("/posts", h.index)
-	app.Get("/posts/:id", h.show)
-	app.Get("/posts/new", h.new)
-	app.Post("/posts", h.create)
-	app.Get("/posts/:id/edit", h.edit)
-	app.Put("/posts/:id", h.update)
-	app.Delete("/posts/:id", h.delete)
+func (ctrl *PostsController) RegisterRoutes(app *fiber.App) {
+	app.Get("/posts", ctrl.index)
+	app.Get("/posts/:id", ctrl.show)
+	app.Get("/posts/new", ctrl.new)
+	app.Post("/posts", ctrl.create)
+	app.Get("/posts/:id/edit", ctrl.edit)
+	app.Put("/posts/:id", ctrl.update)
+	app.Delete("/posts/:id", ctrl.delete)
 }
 
 // GET /posts - index - List all posts
-func (h *PostsController) index(c *fiber.Ctx) error {
+func (ctrl *PostsController) index(ctx *fiber.Ctx) error {
 	post := models.PostModel{}
-	postsRows, err := post.ReadAll(h.Database)
+	postsRows, err := post.ReadAll(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("No posts found"))
+		return RenderTempl(ctx, posts_views.Error("No posts found"))
 	}
-	return RenderTempl(c, posts_views.Index(postsRows))
+	return RenderTempl(ctx, posts_views.Index(postsRows))
 }
 
 // GET /posts/:id - show - Show a single post
-func (h *PostsController) show(c *fiber.Ctx) error {
+func (ctrl *PostsController) show(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
 	post := models.PostModel{ID: uint(id)}
-	err = post.Read(h.Database)
+	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Post not found"))
 	}
@@ -52,12 +52,12 @@ func (h *PostsController) show(c *fiber.Ctx) error {
 }
 
 // GET /posts/new - new - Show the form to create a new post
-func (h *PostsController) new(c *fiber.Ctx) error {
+func (ctrl *PostsController) new(c *fiber.Ctx) error {
 	return RenderTempl(c, posts_views.New())
 }
 
 // POST /posts - create - Create a new post
-func (h *PostsController) create(c *fiber.Ctx) error {
+func (ctrl *PostsController) create(c *fiber.Ctx) error {
 	title := c.FormValue("title")
 	content := c.FormValue("content")
 	author := c.FormValue("author")
@@ -73,7 +73,7 @@ func (h *PostsController) create(c *fiber.Ctx) error {
 		Content: content,
 		Author:  author,
 	}
-	err := post.Create(h.Database)
+	err := post.Create(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to create post"))
 	}
@@ -83,14 +83,14 @@ func (h *PostsController) create(c *fiber.Ctx) error {
 }
 
 // GET /posts/:id/edit - edit - Show the form to edit a post
-func (h *PostsController) edit(c *fiber.Ctx) error {
+func (ctrl *PostsController) edit(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
 	post := models.PostModel{ID: uint(id)}
-	err = post.Read(h.Database)
+	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Post not found"))
 	}
@@ -99,7 +99,7 @@ func (h *PostsController) edit(c *fiber.Ctx) error {
 }
 
 // PUT /posts/:id - update - Update a post
-func (h *PostsController) update(c *fiber.Ctx) error {
+func (ctrl *PostsController) update(c *fiber.Ctx) error {
 	// Parse the post ID from the request.
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -124,7 +124,7 @@ func (h *PostsController) update(c *fiber.Ctx) error {
 	}
 
 	// Save the updated post.
-	err = post.Update(h.Database)
+	err = post.Update(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to update post"))
 	}
@@ -134,14 +134,14 @@ func (h *PostsController) update(c *fiber.Ctx) error {
 }
 
 // DELETE /posts/:id - delete - Delete a post
-func (h *PostsController) delete(c *fiber.Ctx) error {
+func (ctrl *PostsController) delete(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Invalid ID format"))
 	}
 
 	post := models.PostModel{ID: uint(id)}
-	err = post.Delete(h.Database)
+	err = post.Delete(ctrl.Database)
 	if err != nil {
 		return RenderTempl(c, posts_views.Error("Failed to delete post"))
 	}

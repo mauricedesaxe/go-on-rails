@@ -8,12 +8,12 @@ import (
 
 type HelloController struct{}
 
-func (h *HelloController) RegisterRoutes(app *fiber.App) {
-	app.Get("/", h.index)
-	app.Get("/hello", h.index)
+func (ctrl *HelloController) RegisterRoutes(app *fiber.App) {
+	app.Get("/", ctrl.index)
+	app.Get("/hello", ctrl.index)
 }
 
 // GET /posts - index - List all posts
-func (h *HelloController) index(c *fiber.Ctx) error {
-	return RenderTempl(c, hello_views.Index())
+func (ctrl *HelloController) index(ctx *fiber.Ctx) error {
+	return RenderTempl(ctx, hello_views.Index())
 }
