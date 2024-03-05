@@ -24,6 +24,7 @@ var mailjetClient *mailjet.Client
 
 func init() {
 	storage := sqlite3.New() // From github.com/gofiber/storage/sqlite3
+	models.DB = models.InitDB("store.db")
 	sessionStore = session.New(session.Config{
 		Storage: storage,
 	})
@@ -33,7 +34,6 @@ func init() {
 
 func main() {
 	app := fiber.New()
-	models.DB = models.InitDB("store.db")
 
 	app.Use(fiberLogger.New())
 
