@@ -3,15 +3,13 @@ package model
 import (
 	"crypto/rand"
 	"errors"
-	"regexp"
+	"net/mail"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
-
-var emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
 type User struct {
 	gorm.Model
@@ -72,11 +70,8 @@ type Token struct {
 // use in the email link.
 func (t *Token) Create() (string, error) {
 	// Validate the email
-	if len(t.Email) < 3 {
-		return "", errors.New("email too short, must be at least 3 characters")
-	}
-	matched, err := regexp.MatchString(emailRegex, t.Email)
-	if err != nil || !matched {
+	_, err := mail.ParseAddress(t.Email)
+	if err != nil {
 		return "", errors.New("invalid email address")
 	}
 
@@ -116,11 +111,8 @@ func (t *Token) Delete() error {
 
 // ValidateUserInput checks if the user input meets the requirements.
 func ValidateUserInput(u *User) error {
-	if len(u.Email) < 3 {
-		return errors.New("email too short, must be at least 3 characters")
-	}
-	matched, err := regexp.MatchString(emailRegex, u.Email)
-	if err != nil || !matched {
+	_, err := mail.ParseAddress(u.Email)
+	if err != nil {
 		return errors.New("invalid email address")
 	}
 	if len(u.Password) < 16 {
