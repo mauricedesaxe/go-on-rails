@@ -271,6 +271,7 @@ func (a *AuthController) doForgotPassword(c *fiber.Ctx) error {
 	}
 	jobs.AddToQueue(ej)
 
+	// TODO render and info message like "An email with instructions has been sent to your email address" instead
 	// redirect to reset password
 	return c.Redirect("/reset-password")
 }
