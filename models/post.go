@@ -32,28 +32,6 @@ func (model *PostModel) Read(database *gorm.DB) error {
 	return database.First(model, model.ID).Error
 }
 
-func (model *PostModel) ReadByTitle(database *gorm.DB) error {
-	return database.Where("title = ?", model.Title).Or("title LIKE ?", "%"+model.Title+"%").First(model).Error
-}
-
-func (model *PostModel) ReadByAuthor(database *gorm.DB) ([]PostModel, error) {
-	var posts []PostModel
-	err := database.Where("author = ?", model.Author).Or("author LIKE ?", "%"+model.Author+"%").Find(&posts).Error
-	return posts, err
-}
-
-func (model *PostModel) ReadByContent(database *gorm.DB) ([]PostModel, error) {
-	var posts []PostModel
-	err := database.Where("content LIKE ?", "%"+model.Content+"%").Find(&posts).Error
-	return posts, err
-}
-
-func (model *PostModel) ReadByPublished(database *gorm.DB) ([]PostModel, error) {
-	var posts []PostModel
-	err := database.Where("published = ?", model.Published).Find(&posts).Error
-	return posts, err
-}
-
 func (model *PostModel) Update(database *gorm.DB) error {
 	if err := validatePostInput(model); err != nil {
 		return err
