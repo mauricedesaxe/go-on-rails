@@ -69,7 +69,7 @@ func (a *AuthController) profile(c *fiber.Ctx) error {
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.NotLoggedIn())
+		return RenderTempl(c, auth.Error("You are not logged in"))
 	}
 
 	// get user from database
@@ -179,7 +179,7 @@ func (a *AuthController) editProfile(c *fiber.Ctx) error {
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.NotLoggedIn())
+		return RenderTempl(c, auth.Error("You are not logged in"))
 	}
 
 	// get user from database
@@ -204,7 +204,7 @@ func (a *AuthController) updateProfile(c *fiber.Ctx) error {
 	// get user id from session
 	userID := sess.Get("user_id")
 	if userID == nil {
-		return RenderTempl(c, auth.NotLoggedIn())
+		return RenderTempl(c, auth.Error("You are not logged in"))
 	}
 
 	// get user from database
