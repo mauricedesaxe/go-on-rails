@@ -27,12 +27,12 @@ func (h *Posts) RegisterRoutes(app *fiber.App) {
 
 // GET /posts - index - List all posts
 func (h *Posts) index(c *fiber.Ctx) error {
-	var rows []models.Post
-	tx := h.Database.Find(&rows)
-	if tx.Error != nil {
+	post := models.Post{}
+	postsRows, err := post.ReadAll(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("No posts found"))
 	}
-	return RenderTempl(c, posts.Index(rows))
+	return RenderTempl(c, posts.Index(postsRows))
 }
 
 // GET /posts/:id - show - Show a single post
@@ -42,13 +42,13 @@ func (h *Posts) show(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res models.Post
-	tx := h.Database.First(&res, id)
-	if tx.Error != nil {
+	post := models.Post{ID: uint(id)}
+	err = post.Read(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	return RenderTempl(c, posts.Show(res))
+	return RenderTempl(c, posts.Show(post))
 }
 
 // GET /posts/new - new - Show the form to create a new post
@@ -73,10 +73,8 @@ func (h *Posts) create(c *fiber.Ctx) error {
 		Content: content,
 		Author:  author,
 	}
-
-	// Save the new post.
-	tx := h.Database.Create(&post)
-	if tx.Error != nil {
+	err := post.Create(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("Failed to create post"))
 	}
 
@@ -91,13 +89,13 @@ func (h *Posts) edit(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res models.Post
-	tx := h.Database.First(&res, id)
-	if tx.Error != nil {
+	post := models.Post{ID: uint(id)}
+	err = post.Read(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("Post not found"))
 	}
 
-	return RenderTempl(c, posts.Edit(res))
+	return RenderTempl(c, posts.Edit(post))
 }
 
 // PUT /posts/:id - update - Update a post
@@ -108,36 +106,31 @@ func (h *Posts) update(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	// Find the post to update.
-	var res models.Post
-	tx := h.Database.First(&res, id)
-	if tx.Error != nil {
-		return RenderTempl(c, posts.Error("Post not found"))
-	}
-
 	title := c.FormValue("title")
 	content := c.FormValue("content")
 	author := c.FormValue("author")
 
+	post := models.Post{ID: uint(id)}
+
 	// Update the post fields if they are provided.
 	if title != "" {
-		res.Title = title
+		post.Title = title
 	}
 	if content != "" {
-		res.Content = content
+		post.Content = content
 	}
 	if author != "" {
-		res.Author = author
+		post.Author = author
 	}
 
 	// Save the updated post.
-	tx = h.Database.Save(res)
-	if tx.Error != nil {
+	err = post.Update(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("Failed to update post"))
 	}
 
 	// Redirect to the updated post.
-	return c.Redirect("/posts/"+strconv.Itoa(int(res.ID)), http.StatusFound)
+	return c.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
 }
 
 // DELETE /posts/:id - delete - Delete a post
@@ -147,14 +140,9 @@ func (h *Posts) delete(c *fiber.Ctx) error {
 		return RenderTempl(c, posts.Error("Invalid ID format"))
 	}
 
-	var res models.Post
-	tx := h.Database.First(&res, id)
-	if tx.Error != nil {
-		return RenderTempl(c, posts.Error("Post not found"))
-	}
-
-	tx = h.Database.Delete(&res)
-	if tx.Error != nil {
+	post := models.Post{ID: uint(id)}
+	err = post.Delete(h.Database)
+	if err != nil {
 		return RenderTempl(c, posts.Error("Failed to delete post"))
 	}
 
