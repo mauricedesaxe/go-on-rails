@@ -61,7 +61,7 @@ func (ctrl *AuthController) show(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, auth_views.Error(err.Error()))
 	}
 	var isLoggedUser bool = false
-	if userID != user.ID {
+	if userID == user.ID {
 		isLoggedUser = true
 	}
 
