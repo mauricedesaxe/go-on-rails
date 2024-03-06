@@ -13,6 +13,10 @@ import (
 // environment variables and provide a single source of truth
 // for the application's configuration.
 type Env struct {
+	// See that the `env` tag is used to specify the name of the environment variable
+	// and the `default` tag is used to specify a default value if the environment variable
+	// is not set. If a default value is not provided and the environment variable is not set,
+	// the application will panic.
 	BaseUrl         string `env:"BASE_URL" default:"http://localhost:3000"`
 	MjApiKeyPublic  string `env:"MJ_APIKEY_PUBLIC"`
 	MjApiKeyPrivate string `env:"MJ_APIKEY_PRIVATE"`
