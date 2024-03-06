@@ -8,3 +8,9 @@ I am also highly opinionated against thick clients.
 
 If you like [Go](https://golang.org/), [Docker](https://www.docker.com/), [HTMX](https://htmx.org/), [Templ](https://templ.guide/), and [Tailwind](https://tailwindcss.com/), then you might enjoy this project and find value in it.
 
+## How to use
+
+1. Clone this repository
+2. Run `make dev` to start the development server
+3. Open your browser at `http://localhost:3000`
+
