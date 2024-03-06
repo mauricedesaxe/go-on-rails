@@ -38,47 +38,47 @@ func (ctrl *PostsController) index(ctx *fiber.Ctx) error {
 }
 
 // GET /posts/:id - show - Show a single post
-func (ctrl *PostsController) show(c *fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
+func (ctrl *PostsController) show(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Invalid ID format"))
+		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
 	post := models.PostModel{ID: uint(id)}
 	err = post.Read(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Post not found"))
+		return RenderTempl(ctx, posts_views.Error("Post not found"))
 	}
 
 	author := models.UserModel{ID: post.AuthorID}
 	err = author.Read(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Author not found"))
+		return RenderTempl(ctx, posts_views.Error("Author not found"))
 	}
 
-	return RenderTempl(c, posts_views.Show(post, author))
+	return RenderTempl(ctx, posts_views.Show(post, author))
 }
 
 // GET /posts/new - new - Show the form to create a new post
-func (ctrl *PostsController) new(c *fiber.Ctx) error {
-	return RenderTempl(c, posts_views.New())
+func (ctrl *PostsController) new(ctx *fiber.Ctx) error {
+	return RenderTempl(ctx, posts_views.New())
 }
 
 // POST /posts - create - Create a new post
-func (ctrl *PostsController) create(c *fiber.Ctx) error {
-	title := c.FormValue("title")
-	content := c.FormValue("content")
-	author := c.FormValue("author")
+func (ctrl *PostsController) create(ctx *fiber.Ctx) error {
+	title := ctx.FormValue("title")
+	content := ctx.FormValue("content")
+	author := ctx.FormValue("author")
 
 	// Ensure that the required fields are provided.
 	if title == "" || content == "" || author == "" {
-		return RenderTempl(c, posts_views.Error("Title, content, and author are required"))
+		return RenderTempl(ctx, posts_views.Error("Title, content, and author are required"))
 	}
 
 	// Get user from session
-	userID, err := GetUserFromSession(c, ctrl.SessionStore)
+	userID, err := GetUserFromSession(ctx, ctrl.SessionStore)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("You must be logged in to create a post"))
+		return RenderTempl(ctx, posts_views.Error("You must be logged in to create a post"))
 	}
 
 	// Create a new post.
@@ -89,65 +89,65 @@ func (ctrl *PostsController) create(c *fiber.Ctx) error {
 	}
 	err = post.Create(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Failed to create post"))
+		return RenderTempl(ctx, posts_views.Error("Failed to create post"))
 	}
 
 	// Redirect to the new post.
-	return c.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
+	return ctx.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
 }
 
 // GET /posts/:id/edit - edit - Show the form to edit a post
-func (ctrl *PostsController) edit(c *fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
+func (ctrl *PostsController) edit(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Invalid ID format"))
+		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
 	// Get user from session
-	_, err = GetUserFromSession(c, ctrl.SessionStore)
+	_, err = GetUserFromSession(ctx, ctrl.SessionStore)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("You must be logged in to edit a post"))
+		return RenderTempl(ctx, posts_views.Error("You must be logged in to edit a post"))
 	}
 
 	// Find the post by ID.
 	post := models.PostModel{ID: uint(id)}
 	err = post.Read(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Post not found"))
+		return RenderTempl(ctx, posts_views.Error("Post not found"))
 	}
 
-	return RenderTempl(c, posts_views.Edit(post))
+	return RenderTempl(ctx, posts_views.Edit(post))
 }
 
 // PUT /posts/:id - update - Update a post
-func (ctrl *PostsController) update(c *fiber.Ctx) error {
+func (ctrl *PostsController) update(ctx *fiber.Ctx) error {
 	// Parse the post ID from the request.
-	id, err := strconv.Atoi(c.Params("id"))
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Invalid ID format"))
+		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
 	// Get user from session
-	userId, err := GetUserFromSession(c, ctrl.SessionStore)
+	userId, err := GetUserFromSession(ctx, ctrl.SessionStore)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("You must be logged in to edit a post"))
+		return RenderTempl(ctx, posts_views.Error("You must be logged in to edit a post"))
 	}
 
 	// Find the post by ID.
 	post := models.PostModel{ID: uint(id)}
 	err = post.Read(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Post not found"))
+		return RenderTempl(ctx, posts_views.Error("Post not found"))
 	}
 
 	// Ensure that the user is the author of the post.
 	if post.AuthorID != userId {
-		return RenderTempl(c, posts_views.Error("You are not the author of this post"))
+		return RenderTempl(ctx, posts_views.Error("You are not the author of this post"))
 	}
 
 	// Update the post fields locally if they are provided.
-	title := c.FormValue("title")
-	content := c.FormValue("content")
+	title := ctx.FormValue("title")
+	content := ctx.FormValue("content")
 	if title != "" {
 		post.Title = title
 	}
@@ -158,45 +158,45 @@ func (ctrl *PostsController) update(c *fiber.Ctx) error {
 	// Save the updated post to the database.
 	err = post.Update(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Failed to update post"))
+		return RenderTempl(ctx, posts_views.Error("Failed to update post"))
 	}
 
 	// Redirect to the updated post.
-	return c.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
+	return ctx.Redirect("/posts/"+strconv.Itoa(int(post.ID)), http.StatusFound)
 }
 
 // DELETE /posts/:id - delete - Delete a post
-func (ctrl *PostsController) delete(c *fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
+func (ctrl *PostsController) delete(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Invalid ID format"))
+		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
 	// Get user from session
-	userId, err := GetUserFromSession(c, ctrl.SessionStore)
+	userId, err := GetUserFromSession(ctx, ctrl.SessionStore)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("You must be logged in to delete a post"))
+		return RenderTempl(ctx, posts_views.Error("You must be logged in to delete a post"))
 	}
 
 	// Find the post by ID.
 	post := models.PostModel{ID: uint(id)}
 	err = post.Read(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Post not found"))
+		return RenderTempl(ctx, posts_views.Error("Post not found"))
 	}
 
 	// Ensure that the user is the author of the post.
 	if post.AuthorID != userId {
-		return RenderTempl(c, posts_views.Error("You are not the author of this post"))
+		return RenderTempl(ctx, posts_views.Error("You are not the author of this post"))
 	}
 
 	// Delete the post from the database.
 	err = post.Delete(ctrl.Database)
 	if err != nil {
-		return RenderTempl(c, posts_views.Error("Failed to delete post"))
+		return RenderTempl(ctx, posts_views.Error("Failed to delete post"))
 	}
 
-	return c.Redirect("/posts", http.StatusFound)
+	return ctx.Redirect("/posts", http.StatusFound)
 }
 
 // Ensure that Posts implements RouteRegistrar and CoreHandler
