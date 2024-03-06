@@ -49,6 +49,7 @@ func (e *Env) Init(c Config) {
 			if !ok {
 				log.Panicf("Environment variable %s not found", envVar)
 			}
+			log.Printf("Using default value for %s: %s", envVar, envValue)
 		}
 		val.Field(i).SetString(envValue)
 	}
