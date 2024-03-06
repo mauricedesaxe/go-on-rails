@@ -45,7 +45,12 @@ func main() {
 	registrars := []controllers.RouteRegistrar{
 		&controllers.HelloController{},
 		&controllers.PostsController{Database: database},
-		&controllers.AuthController{Database: database, SessionStore: sessionStore, Environment: &environment, MailjetClient: mailjetClient},
+		&controllers.AuthController{
+			Database:      database,
+			SessionStore:  sessionStore,
+			Environment:   &environment,
+			MailjetClient: mailjetClient,
+		},
 	}
 
 	// Register routes for each registrar
