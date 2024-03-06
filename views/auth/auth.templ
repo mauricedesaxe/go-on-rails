@@ -56,82 +56,22 @@ templ Login() {
             <h1 class="text-2xl font-bold">Login</h1>
             <form class="my-4" action="/login" method="post">
                 <input class="border border-gray-800 p-2" type="email" name="email" placeholder="Email" />
-                <input class="border border-gray-800 p-2" type="password" name="password" placeholder="Password" />
                 <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Login" />
-                <p class="my-4">Don't have an account? <a class="text-blue-600 hover:underline" href="/signup">Signup</a></p>
-                <p class="my-4">
-                    Forgot your password? <a class="text-blue-600 hover:underline" href="/forgot-password">Reset it</a> 
-                    or <a class="text-blue-600 hover:underline" href="/magic-link">Login with magic link</a>
-                </p>
+                <p class="my-4">Don't have an account? Don't worry, this acts as signup too</p>
             </form>
         </div>
     }
 }
 
-templ MagicLink() {
+templ Info(msg string) {
     @layout_views.Base() {
         <div class="text-center">
-            <h1 class="text-2xl font-bold">Magic Link</h1>
-            <form class="my-4" action="/magic-link" method="post">
-                <input class="border border-gray-800 p-2" type="email" name="email" placeholder="Email" />
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Send magic link" />
-                <p class="my-4">Remembered your password? <a class="text-blue-600 hover:underline" href="/login">Login</a></p>
-            </form>
-        </div>
-    }
-}
-
-templ EditProfile(user models.UserModel) {
-    @layout_views.Base() {
-        <div class="text-center">
-            <h1 class="text-2xl font-bold">Edit Profile</h1>
-            <form class="my-4" action="/profile" method="put">
-                <input class="border border-gray-800 p-2" type="email" name="email" placeholder="Email" value={user.Email} /> 
-                <input class="border border-gray-800 p-2" type="password" name="password" placeholder="Password" />
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Save" />
-                <p class="my-4"><a class="text-red-600 hover:underline" href="/profile">Cancel</a></p>
-            </form>
-        </div>
-    }
-}
-
-templ Signup() {
-    @layout_views.Base() {
-        <div class="text-center">
-            <h1 class="text-2xl font-bold">Signup</h1>
-            <form class="my-4" action="/signup" method="post">
-                <input class="border border-gray-800 p-2" type="email" name="email" placeholder="Email" />
-                <input class="border border-gray-800 p-2" type="password" name="password" placeholder="Password" />
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Signup" />
-                <p class="my-4">Already have an account? <a class="text-blue-600 hover:underline" href="/login">Login</a></p>
-            </form>
-        </div>
-    }
-}
-
-templ ForgotPassword() {
-    @layout_views.Base() {
-        <div class="text-center">
-            <h1 class="text-2xl font-bold">Forgot Password</h1>
-            <form class="my-4" action="/forgot-password" method="post">
-                <input class="border border-gray-800 p-2" type="email" name="email" placeholder="Email" />
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Send reset link" />
-                <p class="my-4">Remembered your password? <a class="text-blue-600 hover:underline" href="/login">Login</a></p>
-            </form>
-        </div>
-    }
-}
-
-templ ResetPassword(email string, token string) {
-    @layout_views.Base() {
-        <div class="text-center">
-            <h1 class="text-2xl font-bold">Reset Password</h1>
-            <form class="my-4" action="/reset-password" method="put">
-                <input type="hidden" name="email" value={ email } />
-                <input type="hidden" name="token" value={ token } />
-                <input class="border border-gray-800 p-2" type="password" name="password" placeholder="New Password" />
-                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" type="submit" value="Reset Password" />
-            </form>
+            <h1 class="text-2xl font-bold">Info</h1>
+            <div class="max-w-2xl mx-auto bg-blue-100 border border-blue-400 text-blue-700 my-4 px-4 py-3 rounded relative" role="alert">
+                <p>{ msg }</p>
+            </div>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/">Go back to home</a></p>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/login">Go to login</a></p>
         </div>
     }
 }
@@ -145,8 +85,6 @@ templ Error(msg string) {
             </div>
             <p class="my-4"><a class="text-blue-600 hover:underline" href="/">Go back to home</a></p>
             <p class="my-4"><a class="text-blue-600 hover:underline" href="/login">Go to login</a></p>
-            <p class="my-4"><a class="text-blue-600 hover:underline" href="/signup">Go to signup</a></p>
-            <p class="my-4"><a class="text-blue-600 hover:underline" href="/forgot-password">Forgot password</a></p>
         </div>
     }
 }

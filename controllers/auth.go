@@ -11,7 +11,6 @@ import (
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	auth_views "github.com/mauricedesaxe/go-on-rails/views/auth"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -29,16 +28,6 @@ func (ctrl *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Get("/profile", ctrl.profile)
 	app.Get("/login", ctrl.login)
 	app.Post("/login", ctrl.doLogin)
-	app.Get("/signup", ctrl.signup)
-	app.Post("/signup", ctrl.doSignup)
-	app.Get("/profile/edit", ctrl.editProfile)
-	app.Put("/profile", ctrl.updateProfile)
-	app.Get("/forgot-password", ctrl.forgotPassword)
-	app.Post("/forgot-password", ctrl.doForgotPassword)
-	app.Get("/reset-password", ctrl.resetPassword)
-	app.Put("/reset-password", ctrl.doResetPassword)
-	app.Get("/magic-link", ctrl.magicLink)
-	app.Post("/magic-link", ctrl.doMagicLink)
 	app.Get("/logout", ctrl.logout)
 }
 
@@ -87,46 +76,10 @@ func (ctrl *AuthController) profile(ctx *fiber.Ctx) error {
 
 // GET /login - login - Show the login form
 func (ctrl *AuthController) login(ctx *fiber.Ctx) error {
-	return RenderTempl(ctx, auth_views.Login())
-}
-
-// POST /login - doLogin - Process the login form
-func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
-	// get user from session
-	_, err := GetUserFromSession(ctx, ctrl.SessionStore)
-	if err == nil { // If no error, user is already logged in
-		return ctx.Redirect("/profile")
-	}
-
-	// get user from database
-	user := models.UserModel{Email: ctx.FormValue("email")}
-	err = user.ReadByEmail(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// check password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(ctx.FormValue("password")))
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Invalid password"))
-	}
-
-	// set user id in session
-	err = SetUserInSession(ctx, ctrl.SessionStore, user.ID)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error(err.Error()))
-	}
-
-	// redirect to profile
-	return ctx.Redirect("/profile")
-}
-
-// GET /magic-link - magicLink - Show the request magic link form
-func (ctrl *AuthController) magicLink(ctx *fiber.Ctx) error {
 	email := ctx.Query("email")
 	token := ctx.Query("token")
 
-	// if email and token are present, process the magic link
+	// if email and token are present, authenticate the user
 	if email != "" && token != "" {
 		// get user from database
 		user := models.UserModel{Email: email}
@@ -167,21 +120,37 @@ func (ctrl *AuthController) magicLink(ctx *fiber.Ctx) error {
 		return ctx.Redirect("/profile")
 	}
 
-	// if email and token are not present, show the request magic link form
-	return RenderTempl(ctx, auth_views.MagicLink())
+	// if email and token are not present, show the login form
+	return RenderTempl(ctx, auth_views.Login())
 }
 
-// POST /magic-link - doMagicLink - Process the magic link
-func (ctrl *AuthController) doMagicLink(ctx *fiber.Ctx) error {
+// POST /login - doLogin - Send the magic link
+func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
+	var isNewUser bool = false
+
 	// get user from database
 	user := models.UserModel{Email: ctx.FormValue("email")}
 	err := user.ReadByEmail(ctrl.Database)
 	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
+		// if user doesn't exist, create a new user
+		err = user.Create(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error("Failed to create user: "+err.Error()))
+		}
+		isNewUser = true
 	}
 
-	// send ctrl magic link
-	link := ctrl.Environment.BaseUrl + "/magic-link?email=" + user.Email
+	// create a new token
+	token := models.TokenModel{
+		Email: user.Email,
+	}
+	unhashedTokenValue, err := token.Create(ctrl.Database)
+	if err != nil {
+		return RenderTempl(ctx, auth_views.Error("Failed to create token: "+err.Error()))
+	}
+
+	// send magic link email
+	link := ctrl.Environment.BaseUrl + "/magic-link?email=" + user.Email + "&token=" + unhashedTokenValue
 	ej := jobs.EmailJob{
 		From:    "noreply@GoOnRails.com",
 		To:      user.Email,
@@ -191,188 +160,11 @@ func (ctrl *AuthController) doMagicLink(ctx *fiber.Ctx) error {
 	}
 	jobs.AddToQueue(ej)
 
-	// TODO render and info message like "An email with instructions has been sent to your email address" instead
-	// redirect to login
-	return ctx.Redirect("/login")
-}
-
-// GET /signup - signup - Show the signup form
-func (ctrl *AuthController) signup(ctx *fiber.Ctx) error {
-	return RenderTempl(ctx, auth_views.Signup())
-}
-
-// POST /signup - doSignup - Process the signup form
-func (ctrl *AuthController) doSignup(ctx *fiber.Ctx) error {
-	// get user from session
-	_, err := GetUserFromSession(ctx, ctrl.SessionStore)
-	if err == nil { // If no error, user is already logged in
-		return ctx.Redirect("/profile")
+	infoMsg := "An email with login instructions has been sent to your email address"
+	if isNewUser {
+		infoMsg = "We created a new account for you. An email with login instructions has been sent to your email address."
 	}
-
-	// create ctrl new user
-	user := models.UserModel{
-		Email:    ctx.FormValue("email"),
-		Password: ctx.FormValue("password"),
-	}
-
-	// save the user
-	err = user.Create(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to create user: "+err.Error()))
-	}
-
-	// TODO don't log the user in automatically, instead send an email with a magic link to log in
-	// set user id in session
-	err = SetUserInSession(ctx, ctrl.SessionStore, user.ID)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error(err.Error()))
-	}
-
-	// redirect to profile
-	return ctx.Redirect("/profile")
-}
-
-// GET /profile/edit - editProfile - Show the form to edit the profile of the logged in user
-func (ctrl *AuthController) editProfile(ctx *fiber.Ctx) error {
-	// get user from session
-	userID, err := GetUserFromSession(ctx, ctrl.SessionStore)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error(err.Error()))
-	}
-
-	// get user from database
-	user := models.UserModel{ID: userID}
-	err = user.Read(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// render the edit profile form
-	return RenderTempl(ctx, auth_views.EditProfile(user))
-}
-
-// PUT /profile - updateProfile - Update the profile of the logged in user
-func (ctrl *AuthController) updateProfile(ctx *fiber.Ctx) error {
-	// get user from session
-	userID, err := GetUserFromSession(ctx, ctrl.SessionStore)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("You are not logged in"))
-	}
-
-	// get user from database
-	user := models.UserModel{ID: userID}
-	err = user.Read(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// TODO to update the user, we should use magic link to verify the user's email
-	// update user
-	if ctx.FormValue("email") != "" {
-		user.Email = ctx.FormValue("email")
-	}
-	if ctx.FormValue("password") != "" {
-		user.Password = ctx.FormValue("password")
-	}
-
-	// save the user
-	err = user.Update(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to update user: "+err.Error()))
-	}
-
-	// redirect to profile
-	return ctx.Redirect("/profile")
-}
-
-// GET /forgot-password - forgotPassword - Show the forgot password form
-func (ctrl *AuthController) forgotPassword(ctx *fiber.Ctx) error {
-	return RenderTempl(ctx, auth_views.ForgotPassword())
-}
-
-// POST /forgot-password - doForgotPassword - Process the forgot password form
-func (ctrl *AuthController) doForgotPassword(ctx *fiber.Ctx) error {
-	// get user from database
-	user := models.UserModel{Email: ctx.FormValue("email")}
-	err := user.ReadByEmail(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// create ctrl token
-	token := models.TokenModel{
-		Email: user.Email,
-	}
-	tokenValue, err := token.Create(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to create token: "+err.Error()))
-	}
-
-	// send email with token
-	link := ctrl.Environment.BaseUrl + "/reset-password?email=" + user.Email + "&token=" + tokenValue
-	ej := jobs.EmailJob{
-		From:    "noreply@GoOnRails.com",
-		To:      user.Email,
-		Subject: "Reset your password",
-		Body:    "Click this link to reset your password: " + link,
-		Client:  ctrl.MailjetClient,
-	}
-	jobs.AddToQueue(ej)
-
-	// TODO render and info message like "An email with instructions has been sent to your email address" instead
-	// redirect to reset password
-	return ctx.Redirect("/reset-password")
-}
-
-// GET /reset-password - resetPassword - Show the reset password form
-func (ctrl *AuthController) resetPassword(ctx *fiber.Ctx) error {
-	email := ctx.Query("email")
-	tokenValue := ctx.Query("token")
-	return RenderTempl(ctx, auth_views.ResetPassword(email, tokenValue))
-}
-
-// PUT /reset-password - doResetPassword - Process the reset password form
-func (ctrl *AuthController) doResetPassword(ctx *fiber.Ctx) error {
-	// get user from database
-	user := models.UserModel{Email: ctx.FormValue("email")}
-	err := user.ReadByEmail(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// get token from database
-	token := models.TokenModel{
-		Email: user.Email,
-	}
-	err = token.Read(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("No valid tokens were found for this email, please request ctrl new one"))
-	}
-
-	// validate token value
-	hashedToken, err := models.Hash(ctx.FormValue("token"))
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to hash input token: "+err.Error()))
-	}
-	if hashedToken != token.Value {
-		return RenderTempl(ctx, auth_views.Error("Invalid token"))
-	}
-
-	// update user password
-	user.Password = ctx.FormValue("password")
-	err = user.Update(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to update user: "+err.Error()))
-	}
-
-	// delete token
-	err = token.Delete(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("Failed to delete token: "+err.Error()))
-	}
-
-	// redirect to login
-	return ctx.Redirect("/login")
+	return RenderTempl(ctx, auth_views.Info(infoMsg))
 }
 
 // GET /logout - logout - Log the user out
