@@ -60,7 +60,7 @@ func (model *TokenModel) Create(database *gorm.DB) (string, error) {
 	}
 
 	// Generate a random 32 character string using crypto/rand for better randomness
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#%^&*"
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#%^*"
 	b := make([]byte, 32)
 	_, err = rand.Read(b)
 	if err != nil {
