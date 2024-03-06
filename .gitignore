@@ -6,3 +6,7 @@ bin
 *.sqlite
 *.sqlite3
 node_modules
+
+# Compiled files
+*_templ.go
+public/tailwind.css
