@@ -37,6 +37,8 @@ func (ctrl *AuthController) RegisterRoutes(app *fiber.App) {
 	app.Post("/forgot-password", ctrl.doForgotPassword)
 	app.Get("/reset-password", ctrl.resetPassword)
 	app.Put("/reset-password", ctrl.doResetPassword)
+	app.Get("/magic-link", ctrl.magicLink)
+	app.Post("/magic-link", ctrl.doMagicLink)
 	app.Get("/logout", ctrl.logout)
 }
 
@@ -119,6 +121,81 @@ func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
 	return ctx.Redirect("/profile")
 }
 
+// GET /magic-link - magicLink - Show the request magic link form
+func (ctrl *AuthController) magicLink(ctx *fiber.Ctx) error {
+	email := ctx.Query("email")
+	token := ctx.Query("token")
+
+	// if email and token are present, process the magic link
+	if email != "" && token != "" {
+		// get user from database
+		user := models.UserModel{Email: email}
+		err := user.ReadByEmail(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error("User not found"))
+		}
+
+		// get token from database
+		tokenModel := models.TokenModel{Email: user.Email}
+		err = tokenModel.Read(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error("No valid tokens were found for this email, please request ctrl new one"))
+		}
+
+		// validate token value
+		hashedToken, err := models.Hash(token)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error("Failed to hash input token: "+err.Error()))
+		}
+		if hashedToken != tokenModel.Value {
+			return RenderTempl(ctx, auth_views.Error("Invalid token"))
+		}
+
+		// delete token
+		err = tokenModel.Delete(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error("Failed to delete token: "+err.Error()))
+		}
+
+		// set user id in session
+		err = SetUserInSession(ctx, ctrl.SessionStore, user.ID)
+		if err != nil {
+			return RenderTempl(ctx, auth_views.Error(err.Error()))
+		}
+
+		// redirect to profile
+		return ctx.Redirect("/profile")
+	}
+
+	// if email and token are not present, show the request magic link form
+	return RenderTempl(ctx, auth_views.MagicLink())
+}
+
+// POST /magic-link - doMagicLink - Process the magic link
+func (ctrl *AuthController) doMagicLink(ctx *fiber.Ctx) error {
+	// get user from database
+	user := models.UserModel{Email: ctx.FormValue("email")}
+	err := user.ReadByEmail(ctrl.Database)
+	if err != nil {
+		return RenderTempl(ctx, auth_views.Error("User not found"))
+	}
+
+	// send ctrl magic link
+	link := ctrl.Environment.BaseUrl + "/magic-link?email=" + user.Email
+	ej := jobs.EmailJob{
+		From:    "noreply@GoOnRails.com",
+		To:      user.Email,
+		Subject: "Log in to GoOnRails",
+		Body:    "Click this link to log in: " + link,
+		Client:  ctrl.MailjetClient,
+	}
+	jobs.AddToQueue(ej)
+
+	// TODO render and info message like "An email with instructions has been sent to your email address" instead
+	// redirect to login
+	return ctx.Redirect("/login")
+}
+
 // GET /signup - signup - Show the signup form
 func (ctrl *AuthController) signup(ctx *fiber.Ctx) error {
 	return RenderTempl(ctx, auth_views.Signup())
@@ -144,6 +221,7 @@ func (ctrl *AuthController) doSignup(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, auth_views.Error("Failed to create user: "+err.Error()))
 	}
 
+	// TODO don't log the user in automatically, instead send an email with a magic link to log in
 	// set user id in session
 	err = SetUserInSession(ctx, ctrl.SessionStore, user.ID)
 	if err != nil {
@@ -188,6 +266,7 @@ func (ctrl *AuthController) updateProfile(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, auth_views.Error("User not found"))
 	}
 
+	// TODO to update the user, we should use magic link to verify the user's email
 	// update user
 	if ctx.FormValue("email") != "" {
 		user.Email = ctx.FormValue("email")
