@@ -31,7 +31,7 @@ func (model *UserModel) ReadAll(database *gorm.DB) ([]UserModel, error) {
 }
 
 func (model *UserModel) Read(database *gorm.DB) error {
-	return database.First(model, model.ID).Error
+	return database.Order("id desc").First(model).Error
 }
 
 func (model *UserModel) ReadByEmail(database *gorm.DB) error {
@@ -89,7 +89,7 @@ func (model *TokenModel) Create(database *gorm.DB) (string, error) {
 // Reads a token by email where CreatedAt is no older than 24 hours.
 // You're meant to check the read value against another hashed value to verify the token.
 func (model *TokenModel) Read(database *gorm.DB) error {
-	return database.First(model, "email = ? AND created_at > ?", model.Email, time.Now().Add(-24*time.Hour)).Error
+	return database.Order("id desc").First(model, "email = ? AND created_at > ?", model.Email, time.Now().Add(-24*time.Hour)).Error
 }
 
 // Delete deletes a token by email and value.
