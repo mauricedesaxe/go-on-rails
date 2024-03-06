@@ -31,22 +31,22 @@ templ Index(users []models.UserModel) {
     }
 }
 
-templ Show(user models.UserModel) {
+templ Show(user models.UserModel, is_logged_in bool) {
     @layout_views.Base() {
-        <h1 class="text-2xl font-bold">{ user.Email }</h1>
-        <p class="my-4">Created At: { user.CreatedAt.Format("2006-01-02") }</p>
+        <h1 class="text-2xl font-bold">
+            { user.Email }
+            if is_logged_in {
+                (you)
+            }
+        </h1>
+        <p class="my-4">
+            if is_logged_in {
+                Created At: { user.CreatedAt.Format("2006-01-02") }
+            } else {
+                You need to be authorized to see more details about this user
+            }
+        </p>
         <p class="my-4"><a class="text-blue-600 hover:underline" href="/users">Back to all users</a></p>
-    }
-}
-
-templ Profile(user models.UserModel) {
-    @layout_views.Base() {
-        <div class="text-center">
-            <h1 class="text-2xl font-bold">You are logged in as { user.Email }</h1>
-            <p class="my-4">{ user.Email }</p>
-            <p class="my-4"><a class="text-blue-600 hover:underline" href="/profile/edit">Edit Profile</a></p>
-            <p class="my-4"><a class="text-red-600 hover:underline" href="/logout">Logout</a></p>
-        </div>
     }
 }
 

@@ -43,6 +43,7 @@ func (ctrl *AuthController) index(ctx *fiber.Ctx) error {
 
 // GET /users/:id - show - Show ctrl single user
 func (ctrl *AuthController) show(ctx *fiber.Ctx) error {
+	// get user from database
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return RenderTempl(ctx, auth_views.Error("Invalid ID format"))
@@ -52,10 +53,22 @@ func (ctrl *AuthController) show(ctx *fiber.Ctx) error {
 	if err != nil {
 		return RenderTempl(ctx, auth_views.Error("User not found"))
 	}
-	return RenderTempl(ctx, auth_views.Show(user))
+
+	// get user from session to check if it's the logged in user
+	userID, err := GetUserFromSession(ctx, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(ctx, auth_views.Error(err.Error()))
+	}
+	var isLoggedUser bool = false
+	if userID != user.ID {
+		isLoggedUser = true
+	}
+
+	// render the user
+	return RenderTempl(ctx, auth_views.Show(user, isLoggedUser))
 }
 
-// GET /profile - profile - Show the profile of the logged in user
+// GET /profile - profile - Redirect to the user's profile
 func (ctrl *AuthController) profile(ctx *fiber.Ctx) error {
 	// get user from session
 	userID, err := GetUserFromSession(ctx, ctrl.SessionStore)
@@ -63,15 +76,7 @@ func (ctrl *AuthController) profile(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, auth_views.Error(err.Error()))
 	}
 
-	// get user from database
-	user := models.UserModel{ID: userID}
-	err = user.Read(ctrl.Database)
-	if err != nil {
-		return RenderTempl(ctx, auth_views.Error("User not found"))
-	}
-
-	// render the profile
-	return RenderTempl(ctx, auth_views.Profile(user))
+	return ctx.Redirect("/users/" + strconv.Itoa(int(userID)))
 }
 
 // GET /login - login - Show the login form
