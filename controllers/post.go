@@ -19,8 +19,8 @@ type PostsController struct {
 
 func (ctrl *PostsController) RegisterRoutes(app *fiber.App) {
 	app.Get("/posts", ctrl.index)
-	app.Get("/posts/:id", ctrl.show)
 	app.Get("/posts/new", ctrl.new)
+	app.Get("/posts/:id", ctrl.show)
 	app.Post("/posts", ctrl.create)
 	app.Get("/posts/:id/edit", ctrl.edit)
 	app.Put("/posts/:id", ctrl.update)
