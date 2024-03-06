@@ -13,7 +13,7 @@ import (
 // environment variables and provide a single source of truth
 // for the application's configuration.
 type Env struct {
-	BaseUrl         string `env:"BASE_URL;default=http://localhost:3000"`
+	BaseUrl         string `env:"BASE_URL" default:"http://localhost:3000"`
 	MjApiKeyPublic  string `env:"MJ_APIKEY_PUBLIC"`
 	MjApiKeyPrivate string `env:"MJ_APIKEY_PRIVATE"`
 	// * Add more environment variables here
