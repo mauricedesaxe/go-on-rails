@@ -11,6 +11,7 @@ import (
 	"github.com/mauricedesaxe/go-on-rails/jobs"
 	models "github.com/mauricedesaxe/go-on-rails/models"
 	auth_views "github.com/mauricedesaxe/go-on-rails/views/auth"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -101,18 +102,15 @@ func (ctrl *AuthController) login(ctx *fiber.Ctx) error {
 		}
 
 		// validate token value
-		hashedToken, err := models.Hash(token)
+		err = bcrypt.CompareHashAndPassword([]byte(tokenModel.Value), []byte(token))
 		if err != nil {
-			return RenderTempl(ctx, auth_views.Error("Failed to hash input token: "+err.Error()))
-		}
-		if hashedToken != tokenModel.Value {
 			return RenderTempl(ctx, auth_views.Error("Invalid token"))
 		}
 
 		// delete token
 		err = tokenModel.Delete(ctrl.Database)
 		if err != nil {
-			return RenderTempl(ctx, auth_views.Error("Failed to delete token: "+err.Error()))
+			return RenderTempl(ctx, auth_views.Error("Failed to delete token"))
 		}
 
 		// set user id in session

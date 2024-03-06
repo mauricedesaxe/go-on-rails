@@ -69,17 +69,21 @@ func (model *TokenModel) Create(database *gorm.DB) (string, error) {
 	for i := range b {
 		b[i] = charset[b[i]%byte(len(charset))]
 	}
-	val := string(b)
+	unhashedValue := string(b)
 
 	// Hash the random string
-	hashed, err := Hash(val)
+	hashBytes, err := bcrypt.GenerateFromPassword(
+		[]byte(unhashedValue),
+		bcrypt.DefaultCost,
+	)
 	if err != nil {
 		return "", err
 	}
+	hashedValue := string(hashBytes)
 
 	// Store the hashed string and return the unhashed string for use in the email link
-	model.Value = hashed
-	return val, database.Create(model).Error
+	model.Value = hashedValue
+	return unhashedValue, database.Create(model).Error
 }
 
 // Reads a token by email where CreatedAt is no older than 24 hours.
@@ -91,19 +95,4 @@ func (model *TokenModel) Read(database *gorm.DB) error {
 // Delete deletes a token by email and value.
 func (model *TokenModel) Delete(database *gorm.DB) error {
 	return database.Delete(model, "email = ? AND value = ?", model.Email, model.Value).Error
-}
-
-// Hashes the input string using bcrypt, a one-way hashing algorithm.
-func Hash(input string) (output string, err error) {
-	if len(input) > 0 {
-		hashBytes, err := bcrypt.GenerateFromPassword(
-			[]byte(input),
-			bcrypt.DefaultCost,
-		)
-		if err != nil {
-			return "", err
-		}
-		output = string(hashBytes)
-	}
-	return output, nil
 }
