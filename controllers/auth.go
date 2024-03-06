@@ -85,11 +85,17 @@ func (ctrl *AuthController) login(ctx *fiber.Ctx) error {
 	email := ctx.Query("email")
 	token := ctx.Query("token")
 
+	// if user is already logged in, redirect to profile
+	_, err := GetUserFromSession(ctx, ctrl.SessionStore)
+	if err == nil {
+		return ctx.Redirect("/profile")
+	}
+
 	// if email and token are present, authenticate the user
 	if email != "" && token != "" {
 		// get user from database
 		user := models.UserModel{Email: email}
-		err := user.ReadByEmail(ctrl.Database)
+		err = user.ReadByEmail(ctrl.Database)
 		if err != nil {
 			return RenderTempl(ctx, auth_views.Error("User not found"))
 		}
