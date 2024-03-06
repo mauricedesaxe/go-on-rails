@@ -155,7 +155,7 @@ func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
 	}
 
 	// send magic link email
-	link := ctrl.Environment.BaseUrl + "/magic-link?email=" + user.Email + "&token=" + unhashedTokenValue
+	link := ctrl.Environment.BaseUrl + "/login?email=" + user.Email + "&token=" + unhashedTokenValue
 	ej := jobs.EmailJob{
 		From:    ctrl.Environment.FromEmail,
 		To:      user.Email,
