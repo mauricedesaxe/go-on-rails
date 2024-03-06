@@ -14,3 +14,11 @@ If you like [Go](https://golang.org/), [Docker](https://www.docker.com/), [HTMX]
 2. Run `make dev` to start the development server
 3. Open your browser at `http://localhost:3000`
 
+## How to deploy
+
+1. Clone this repository
+2. Build the Docker image with `docker build -t yourapp .`
+3. Run the Docker container with `docker run -p 8080:8080 yourapp`
+
+Alternatively, you can write a `docker-compose.yml` file and use it to deploy your app.
+This is not included here because you may likely use one for multiple services, not just this one.
