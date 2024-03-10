@@ -22,3 +22,13 @@ If you like [Go](https://golang.org/), [Docker](https://www.docker.com/), [HTMX]
 
 Alternatively, you can write a `docker-compose.yml` file and use it to deploy your app.
 This is not included here because you may likely use one for multiple services, not just this one.
+
+
+## What's included
+
+We included examples of:
+
+- how session-based authentication can be implemented in Go, see the `auth` models, controllers, and views.
+- CRUD operations under auth; see the `posts` models, controllers, and views where users can create, read, update, and delete posts.
+- user permissions, payments integration & file uploads/downloads in an eCommerce context; see the `commerce` models, controllers, and views.
+- analytics dashboard that shows how to 1. track user interactions 2. use HTMX to update the UI; see the `analytics` model, controller, and views.
