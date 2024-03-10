@@ -8,7 +8,6 @@ import (
 
 type PostModel struct {
 	gorm.Model
-	ID        uint   `gorm:"primaryKey"`
 	Title     string `gorm:"type:varchar(100);not null"`
 	Content   string `gorm:"type:text;not null"`
 	AuthorID  uint   `gorm:"type:integer;not null"`
