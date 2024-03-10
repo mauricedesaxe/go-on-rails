@@ -14,6 +14,7 @@ type UserModel struct {
 	gorm.Model
 	ID    uint   `gorm:"primaryKey"`
 	Email string `gorm:"unique"`
+	Role  string `gorm:"type:varchar(100);not null;default:'user'"` // "user", "admin", ...
 }
 
 func (model *UserModel) Create(database *gorm.DB) error {
@@ -21,6 +22,10 @@ func (model *UserModel) Create(database *gorm.DB) error {
 	if err != nil {
 		return errors.New("invalid email address")
 	}
+	if model.Role == "" {
+		model.Role = "user"
+	}
+
 	return database.Create(model).Error
 }
 
