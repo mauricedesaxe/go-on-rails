@@ -11,33 +11,35 @@ import (
 
 templ OrdersIndex(orders []models.Order) {
 	@layout_views.Base() {
-	 <table>
-        <thead>
-            <tr>
-                <th>External ID</th>
-                <th>User ID</th>
-                <th>Status</th>
-                <th>Product ID</th>
-                <th>Price Amount</th>
-                <th>Price Currency</th>
-                <th>Invoice URL</th>
-            </tr>
-        </thead>
-        <tbody>
-            for _, order := range orders {
+        <h1 class="text-2xl font-bold">Orders</h1>
+        <table class="table-auto my-4">
+            <thead>
                 <tr>
-                    <td>{ order.ExternalId }</td>
-                    <td>{ strconv.Itoa(int(order.UserId)) }</td>
-                    <td>{ string(order.Status) }</td>
-                    <td>{ strconv.Itoa(int(order.ProductId)) }</td>
-                    <td>{ strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</td>
-                    <td>{ order.PriceCurrency }</td>
-                    <td><a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></td>
-                    <td><a href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) }>Show</a></td>
+                    <th class="border border-gray-800 p-2">External ID</th>
+                    <th class="border border-gray-800 p-2">User ID</th>
+                    <th class="border border-gray-800 p-2">Status</th>
+                    <th class="border border-gray-800 p-2">Product ID</th>
+                    <th class="border border-gray-800 p-2">Price Amount</th>
+                    <th class="border border-gray-800 p-2">Price Currency</th>
+                    <th class="border border-gray-800 p-2">Invoice URL</th>
+                    <th class="border border-gray-800 p-2">Show</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                for _, order := range orders {
+                    <tr>
+                        <td class="border border-gray-800 p-2">{ order.ExternalId }</td>
+                        <td class="border border-gray-800 p-2">{ strconv.Itoa(int(order.UserId)) }</td>
+                        <td class="border border-gray-800 p-2">{ string(order.Status) }</td>
+                        <td class="border border-gray-800 p-2">{ strconv.Itoa(int(order.ProductId)) }</td>
+                        <td class="border border-gray-800 p-2">{ strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</td>
+                        <td class="border border-gray-800 p-2">{ order.PriceCurrency }</td>
+                        <td class="border border-gray-800 p-2"><a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></td>
+                        <td class="border border-gray-800 p-2"><a href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) }>Show</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 	}
 }
 
