@@ -1,6 +1,11 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"errors"
+	"strings"
+
+	"gorm.io/gorm"
+)
 
 type Product struct {
 	gorm.Model
@@ -87,16 +92,38 @@ const (
 
 type Order struct {
 	gorm.Model
-	ExternalId    string      `json:"external_id" gorm:"unique"` // from NOWPayments
-	UserId        uint        `json:"user_id"`                   // the user who made the payment
-	Status        OrderStatus `json:"status"`                    // waiting, confirming, confirmed, sending, partially_paid, finished, failed, expired
-	ProductId     uint        `json:"product_id"`                // the product the user bought
-	PriceAmount   float64     `json:"price_amount"`              // the amount the user paid (it's important to store because prices can change)
-	PriceCurrency string      `json:"price_currency"`            // the currency in which we denominate the amount (e.g. usd)
-	InvoiceUrl    string      `json:"invoice_url" gorm:"unique"` // from NOWPayments
+	ExternalId    string      `json:"external_id" gorm:"unique;not null"` // from NOWPayments
+	UserId        uint        `json:"user_id" gorm:"not null"`            // the user who made the payment
+	Status        OrderStatus `json:"status" gorm:"not null"`             // waiting, confirming, confirmed, sending, partially_paid, finished, failed, expired
+	ProductId     uint        `json:"product_id" gorm:"not null"`         // the product the user bought
+	PriceAmount   float64     `json:"price_amount" gorm:"not null"`       // the amount the user paid (it's important to store because prices can change)
+	PriceCurrency string      `json:"price_currency" gorm:"not null"`     // the currency in which we denominate the amount (e.g. usd)
+	InvoiceUrl    string      `json:"invoice_url" gorm:"unique;not null"` // from NOWPayments
 }
 
 func (model *Order) Create(database *gorm.DB) error {
+	user := User{}
+	user.ID = model.UserId
+	err := user.Read(database)
+	if err != nil {
+		return errors.New("user doesn't exist")
+	}
+	if model.Status == "" {
+		model.Status = Waiting
+	}
+	product := Product{}
+	product.ID = model.ProductId
+	err = product.Read(database)
+	if err != nil {
+		return errors.New("product doesn't exist")
+	}
+	if model.PriceCurrency == "" {
+		model.PriceCurrency = "usd"
+	}
+	if !strings.HasPrefix(model.InvoiceUrl, "https://api.nowpayments.io/") {
+		return errors.New("invoice URL must be from the api.nowpayments.io domain")
+	}
+
 	return database.Create(model).Error
 }
 
@@ -111,6 +138,28 @@ func (model *Order) Read(database *gorm.DB) error {
 }
 
 func (model *Order) Update(database *gorm.DB) error {
+	user := User{}
+	user.ID = model.UserId
+	err := user.Read(database)
+	if err != nil {
+		return errors.New("user doesn't exist")
+	}
+	if model.Status == "" {
+		model.Status = Waiting
+	}
+	product := Product{}
+	product.ID = model.ProductId
+	err = product.Read(database)
+	if err != nil {
+		return errors.New("product doesn't exist")
+	}
+	if model.PriceCurrency == "" {
+		model.PriceCurrency = "usd"
+	}
+	if !strings.HasPrefix(model.InvoiceUrl, "https://api.nowpayments.io/") {
+		return errors.New("invoice URL must be from the api.nowpayments.io domain")
+	}
+
 	return database.Save(model).Error
 }
 
