@@ -47,6 +47,7 @@ templ OrdersIndex(orders []models.Order) {
 templ OrdersShow(order models.Order) {
     @layout_views.Base() {
         <h1 class="text-2xl font-bold">Order</h1>
+        <p>ID: { strconv.Itoa(int(order.ID)) }</p>
         <p>External ID: { order.ExternalId }</p>
         <p>User ID: { strconv.Itoa(int(order.UserId)) }</p>
         <p>Status: { string(order.Status) }</p>
