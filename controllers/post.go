@@ -44,7 +44,8 @@ func (ctrl *PostsController) show(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
-	post := models.PostModel{ID: uint(id)}
+	post := models.PostModel{}
+	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Post not found"))
@@ -110,7 +111,8 @@ func (ctrl *PostsController) edit(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{ID: uint(id)}
+	post := models.PostModel{}
+	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Post not found"))
@@ -134,7 +136,8 @@ func (ctrl *PostsController) update(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{ID: uint(id)}
+	post := models.PostModel{}
+	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Post not found"))
@@ -179,7 +182,8 @@ func (ctrl *PostsController) delete(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{ID: uint(id)}
+	post := models.PostModel{}
+	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Post not found"))
