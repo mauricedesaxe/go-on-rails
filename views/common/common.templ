@@ -1,0 +1,31 @@
+package common_views
+
+import (
+	"github.com/mauricedesaxe/go-on-rails/views/layout"
+)
+
+templ Info(msg string) {
+    @layout_views.Base() {
+        <div class="text-center">
+            <h1 class="text-2xl font-bold">Info</h1>
+            <div class="max-w-2xl mx-auto bg-blue-100 border border-blue-400 text-blue-700 my-4 px-4 py-3 rounded relative" role="alert">
+                <p>{ msg }</p>
+            </div>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/">Go back to home</a></p>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/login">Go to login</a></p>
+        </div>
+    }
+}
+
+templ Error(msg string) {
+    @layout_views.Base() {
+        <div class="text-center">
+            <h1 class="text-2xl font-bold">Unexpected error</h1>
+            <div class="max-w-2xl mx-auto bg-red-100 border border-red-400 text-red-700 my-4 px-4 py-3 rounded relative" role="alert">
+                <p>{ msg }</p>
+            </div>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/">Go back to home</a></p>
+            <p class="my-4"><a class="text-blue-600 hover:underline" href="/login">Go to login</a></p>
+        </div>
+    }
+}
