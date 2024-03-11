@@ -26,7 +26,9 @@ var mailjetClient *mailjet.Client
 
 func init() {
 	database = models.InitDB("store.db")
-	storage := sqlite3.New() // From github.com/gofiber/storage/sqlite3
+	storage := sqlite3.New(sqlite3.Config{
+		Database: ":memory:",
+	}) // open a new in-memory session store
 	sessionStore = session.New(session.Config{
 		Storage: storage,
 	})
