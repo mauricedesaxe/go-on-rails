@@ -9,7 +9,7 @@ import (
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
-templ Index(orders []models.Order) {
+templ OrdersIndex(orders []models.Order) {
 	@layout_views.Base() {
 	 <table>
         <thead>
@@ -41,7 +41,7 @@ templ Index(orders []models.Order) {
 	}
 }
 
-templ Show(order models.Order) {
+templ OrdersShow(order models.Order) {
     @layout_views.Base() {
         <h1>Order</h1>
         <p>External ID: { order.ExternalId }</p>

@@ -51,7 +51,7 @@ func (ctrl *OrdersController) index(ctx *fiber.Ctx) error {
 	}
 
 	// render a template with the orders
-	return RenderTempl(ctx, commerce_views.Index(orders))
+	return RenderTempl(ctx, commerce_views.OrdersIndex(orders))
 }
 
 // GET /orders/:id - show - Show a single order
@@ -87,5 +87,5 @@ func (ctrl *OrdersController) show(ctx *fiber.Ctx) error {
 	}
 
 	// render a template with the order
-	return RenderTempl(ctx, commerce_views.Show(order))
+	return RenderTempl(ctx, commerce_views.OrdersShow(order))
 }
