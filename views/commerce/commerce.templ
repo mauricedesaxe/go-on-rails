@@ -1,0 +1,55 @@
+
+
+package commerce_views
+
+import (
+	"github.com/mauricedesaxe/go-on-rails/views/layout"
+    "strconv"
+
+    models "github.com/mauricedesaxe/go-on-rails/models"
+)
+
+templ Index(orders []models.OrderModel) {
+	@layout_views.Base() {
+	 <table>
+        <thead>
+            <tr>
+                <th>External ID</th>
+                <th>User ID</th>
+                <th>Status</th>
+                <th>Product ID</th>
+                <th>Price Amount</th>
+                <th>Price Currency</th>
+                <th>Invoice URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            for _, order := range orders {
+                <tr>
+                    <td>{ order.ExternalId }</td>
+                    <td>{ strconv.Itoa(int(order.UserId)) }</td>
+                    <td>{ string(order.Status) }</td>
+                    <td>{ strconv.Itoa(int(order.ProductId)) }</td>
+                    <td>{ strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</td>
+                    <td>{ order.PriceCurrency }</td>
+                    <td><a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></td>
+                    <td><a href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) }>Show</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+	}
+}
+
+templ Show(order models.OrderModel) {
+    @layout_views.Base() {
+        <h1>Order</h1>
+        <p>External ID: { order.ExternalId }</p>
+        <p>User ID: { strconv.Itoa(int(order.UserId)) }</p>
+        <p>Status: { string(order.Status) }</p>
+        <p>Product ID: { strconv.Itoa(int(order.ProductId)) }</p>
+        <p>Price Amount: { strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</p>
+        <p>Price Currency: { order.PriceCurrency }</p>
+        <p>Invoice URL: <a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></p>
+    }
+}

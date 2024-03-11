@@ -53,6 +53,11 @@ func main() {
 			Environment:   &environment,
 			MailjetClient: mailjetClient,
 		},
+		&controllers.OrdersController{
+			Database:     database,
+			SessionStore: sessionStore,
+			Environment:  &environment,
+		},
 	}
 
 	// Register routes for each registrar
