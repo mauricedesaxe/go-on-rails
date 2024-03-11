@@ -46,13 +46,13 @@ templ OrdersIndex(orders []models.Order) {
 
 templ OrdersShow(order models.Order) {
     @layout_views.Base() {
-        <h1>Order</h1>
+        <h1 class="text-2xl font-bold">Order</h1>
         <p>External ID: { order.ExternalId }</p>
         <p>User ID: { strconv.Itoa(int(order.UserId)) }</p>
         <p>Status: { string(order.Status) }</p>
         <p>Product ID: { strconv.Itoa(int(order.ProductId)) }</p>
         <p>Price Amount: { strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</p>
         <p>Price Currency: { order.PriceCurrency }</p>
-        <p>Invoice URL: <a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></p>
+        <p>Invoice URL: <a class="text-blue-600 hover:underline" href={ templ.URL(order.InvoiceUrl) }>Invoice</a></p>
     }
 }
