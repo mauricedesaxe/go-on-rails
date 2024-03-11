@@ -43,6 +43,7 @@ type File struct {
 	FileBlob  []byte `gorm:"type:blob;not null"`
 	Type      string `gorm:"type:varchar(100);not null"` // "image/jpeg", "application/pdf", ...
 	Extension string `gorm:"type:varchar(10);not null"`  // "jpg", "png", "pdf", ...
+	ProductID uint   `gorm:"index;not null"`             // the product this file belongs to
 }
 
 // make sure to put this behind role permissions so only admins can create files
