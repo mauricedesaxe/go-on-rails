@@ -9,7 +9,7 @@ import (
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
-templ Index(users []models.UserModel) {
+templ Index(users []models.User) {
     @layout_views.Base() {
         <h1 class="text-2xl font-bold">Users</h1>
         <table class="table-auto my-4">
@@ -31,7 +31,7 @@ templ Index(users []models.UserModel) {
     }
 }
 
-templ Show(user models.UserModel, is_logged_in bool) {
+templ Show(user models.User, is_logged_in bool) {
     @layout_views.Base() {
         <h1 class="text-2xl font-bold">
             { user.Email }

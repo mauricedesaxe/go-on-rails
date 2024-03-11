@@ -29,7 +29,7 @@ func (ctrl *PostsController) RegisterRoutes(app *fiber.App) {
 
 // GET /posts - index - List all posts
 func (ctrl *PostsController) index(ctx *fiber.Ctx) error {
-	post := models.PostModel{}
+	post := models.Post{}
 	postsRows, err := post.ReadAll(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("No posts found"))
@@ -44,14 +44,14 @@ func (ctrl *PostsController) show(ctx *fiber.Ctx) error {
 		return RenderTempl(ctx, posts_views.Error("Invalid ID format"))
 	}
 
-	post := models.PostModel{}
+	post := models.Post{}
 	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Post not found"))
 	}
 
-	author := models.UserModel{ID: post.AuthorID}
+	author := models.User{ID: post.AuthorID}
 	err = author.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, posts_views.Error("Author not found"))
@@ -83,7 +83,7 @@ func (ctrl *PostsController) create(ctx *fiber.Ctx) error {
 	}
 
 	// Create a new post.
-	post := models.PostModel{
+	post := models.Post{
 		Title:    title,
 		Content:  content,
 		AuthorID: userID,
@@ -111,7 +111,7 @@ func (ctrl *PostsController) edit(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{}
+	post := models.Post{}
 	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
@@ -136,7 +136,7 @@ func (ctrl *PostsController) update(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{}
+	post := models.Post{}
 	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {
@@ -182,7 +182,7 @@ func (ctrl *PostsController) delete(ctx *fiber.Ctx) error {
 	}
 
 	// Find the post by ID.
-	post := models.PostModel{}
+	post := models.Post{}
 	post.ID = uint(id)
 	err = post.Read(ctrl.Database)
 	if err != nil {

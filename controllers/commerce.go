@@ -32,7 +32,7 @@ func (ctrl *OrdersController) index(ctx *fiber.Ctx) error {
 	}
 
 	// get user from db & check if admin
-	var user model.UserModel
+	var user model.User
 	user.ID = userId
 	err = user.Read(ctrl.Database)
 	if err != nil {
@@ -43,8 +43,8 @@ func (ctrl *OrdersController) index(ctx *fiber.Ctx) error {
 	}
 
 	// get all orders from db
-	var order model.OrderModel
-	var orders []model.OrderModel
+	var order model.Order
+	var orders []model.Order
 	orders, err = order.ReadAll(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, common_views.Error("Error reading orders from database"))
@@ -63,7 +63,7 @@ func (ctrl *OrdersController) show(ctx *fiber.Ctx) error {
 	}
 
 	// get user from db & check if admin
-	var user model.UserModel
+	var user model.User
 	user.ID = userId
 	err = user.Read(ctrl.Database)
 	if err != nil {
@@ -74,7 +74,7 @@ func (ctrl *OrdersController) show(ctx *fiber.Ctx) error {
 	}
 
 	// get order from db
-	var order model.OrderModel
+	var order model.Order
 	strID := ctx.Params("id")
 	intID, err := strconv.Atoi(strID)
 	if err != nil {

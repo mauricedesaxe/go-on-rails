@@ -34,7 +34,7 @@ func (ctrl *AuthController) RegisterRoutes(app *fiber.App) {
 
 // GET /users/ - index - List all users
 func (ctrl *AuthController) index(ctx *fiber.Ctx) error {
-	user := models.UserModel{}
+	user := models.User{}
 	users, err := user.ReadAll(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, auth_views.Error("No users found"))
@@ -49,7 +49,7 @@ func (ctrl *AuthController) show(ctx *fiber.Ctx) error {
 	if err != nil {
 		return RenderTempl(ctx, auth_views.Error("Invalid ID format"))
 	}
-	user := models.UserModel{ID: uint(id)}
+	user := models.User{ID: uint(id)}
 	err = user.Read(ctrl.Database)
 	if err != nil {
 		return RenderTempl(ctx, auth_views.Error("User not found"))
@@ -94,14 +94,14 @@ func (ctrl *AuthController) login(ctx *fiber.Ctx) error {
 	// if email and token are present, authenticate the user
 	if email != "" && token != "" {
 		// get user from database
-		user := models.UserModel{Email: email}
+		user := models.User{Email: email}
 		err = user.ReadByEmail(ctrl.Database)
 		if err != nil {
 			return RenderTempl(ctx, auth_views.Error("User not found"))
 		}
 
 		// get token from database
-		tokenModel := models.TokenModel{Email: user.Email}
+		tokenModel := models.Token{Email: user.Email}
 		err = tokenModel.Read(ctrl.Database)
 		if err != nil {
 			return RenderTempl(ctx, auth_views.Error("No valid tokens were found for this email, please request ctrl new one"))
@@ -138,7 +138,7 @@ func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
 	var isNewUser bool = false
 
 	// get user from database
-	user := models.UserModel{Email: ctx.FormValue("email")}
+	user := models.User{Email: ctx.FormValue("email")}
 	err := user.ReadByEmail(ctrl.Database)
 	if err != nil {
 		// if user doesn't exist, create a new user
@@ -150,7 +150,7 @@ func (ctrl *AuthController) doLogin(ctx *fiber.Ctx) error {
 	}
 
 	// create a new token
-	token := models.TokenModel{
+	token := models.Token{
 		Email: user.Email,
 	}
 	unhashedTokenValue, err := token.Create(ctrl.Database)

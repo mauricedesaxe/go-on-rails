@@ -13,12 +13,12 @@ func InitDB(dest string) *gorm.DB {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&PostModel{})
-	db.AutoMigrate(&UserModel{})
-	db.AutoMigrate(&TokenModel{})
-	db.AutoMigrate(&ProductModel{})
-	db.AutoMigrate(&FileModel{})
-	db.AutoMigrate(&OrderModel{})
+	db.AutoMigrate(&Post{})
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Token{})
+	db.AutoMigrate(&Product{})
+	db.AutoMigrate(&File{})
+	db.AutoMigrate(&Order{})
 
 	return db
 }

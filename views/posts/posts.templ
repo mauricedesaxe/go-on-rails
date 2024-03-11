@@ -8,7 +8,7 @@ import (
     models "github.com/mauricedesaxe/go-on-rails/models"
 )
 
-templ Index(posts []models.PostModel) {
+templ Index(posts []models.Post) {
 	@layout_views.Base() {
 	 <ul>
         for _, post := range posts {
@@ -19,7 +19,7 @@ templ Index(posts []models.PostModel) {
 	}
 }
 
-templ Show(post models.PostModel, author models.UserModel) {
+templ Show(post models.Post, author models.User) {
     @layout_views.Base() {
         <h1>{ post.Title }</h1>
         <p>By { author.Email }</p>
@@ -50,7 +50,7 @@ templ New() {
     }
 }
 
-templ Edit(post models.PostModel) {
+templ Edit(post models.Post) {
     @layout_views.Base() {
         <h1>Edit post</h1>
         <form action="/posts/{ post.Id }" method="post">
