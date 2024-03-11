@@ -18,6 +18,7 @@ func InitDB(dest string) *gorm.DB {
 	db.AutoMigrate(&TokenModel{})
 	db.AutoMigrate(&ProductModel{})
 	db.AutoMigrate(&FileModel{})
+	db.AutoMigrate(&OrderModel{})
 
 	return db
 }

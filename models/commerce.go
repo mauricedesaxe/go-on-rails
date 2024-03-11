@@ -69,3 +69,49 @@ func (model *FileModel) Update(database *gorm.DB) error {
 func (model *FileModel) Delete(database *gorm.DB) error {
 	return database.Delete(model).Error
 }
+
+type OrderStatus string
+
+const (
+	Waiting       OrderStatus = "waiting"
+	Confirming    OrderStatus = "confirming"
+	Confirmed     OrderStatus = "confirmed"
+	Sending       OrderStatus = "sending"
+	PartiallyPaid OrderStatus = "partially_paid"
+	Finished      OrderStatus = "finished"
+	Failed        OrderStatus = "failed"
+	Expired       OrderStatus = "expired"
+)
+
+type OrderModel struct {
+	gorm.Model
+	ExternalId    string      `json:"external_id" gorm:"unique"` // from NOWPayments
+	UserId        uint        `json:"user_id"`                   // the user who made the payment
+	Status        OrderStatus `json:"status"`                    // waiting, confirming, confirmed, sending, partially_paid, finished, failed, expired
+	ProductId     uint        `json:"product_id"`                // the product the user bought
+	PriceAmount   float64     `json:"price_amount"`              // the amount the user paid (it's important to store because prices can change)
+	PriceCurrency string      `json:"price_currency"`            // the currency in which we denominate the amount (e.g. usd)
+	InvoiceUrl    string      `json:"invoice_url" gorm:"unique"` // from NOWPayments
+}
+
+func (model *OrderModel) Create(database *gorm.DB) error {
+	return database.Create(model).Error
+}
+
+func (model *OrderModel) ReadAll(database *gorm.DB) ([]OrderModel, error) {
+	var orders []OrderModel
+	err := database.Find(&orders).Error
+	return orders, err
+}
+
+func (model *OrderModel) Read(database *gorm.DB) error {
+	return database.First(model, model.ID).Error
+}
+
+func (model *OrderModel) Update(database *gorm.DB) error {
+	return database.Save(model).Error
+}
+
+func (model *OrderModel) Delete(database *gorm.DB) error {
+	return database.Delete(model).Error
+}
