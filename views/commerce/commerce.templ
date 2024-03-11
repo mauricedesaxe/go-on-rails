@@ -35,7 +35,7 @@ templ OrdersIndex(orders []models.Order) {
                         <td class="border border-gray-800 p-2">{ strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</td>
                         <td class="border border-gray-800 p-2">{ order.PriceCurrency }</td>
                         <td class="border border-gray-800 p-2"><a href={ templ.URL(order.InvoiceUrl) }>Invoice</a></td>
-                        <td class="border border-gray-800 p-2"><a href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) }>Show</a></td>
+                        <td class="border border-gray-800 p-2"><a class="text-blue-600 hover:underline" href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) }>Show</a></td>
                     </tr>
                 }
             </tbody>
