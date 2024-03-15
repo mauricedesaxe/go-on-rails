@@ -55,5 +55,88 @@ templ OrdersShow(order models.Order) {
         <p>Price Amount: { strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }</p>
         <p>Price Currency: { order.PriceCurrency }</p>
         <p>Invoice URL: <a class="text-blue-600 hover:underline" href={ templ.URL(order.InvoiceUrl) }>Invoice</a></p>
+        <p><a class="text-blue-600 hover:underline" href={ templ.URL("/orders/" + strconv.Itoa(int(order.ID)) + "/edit") }>Edit</a></p>
+        <form action={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) } method="delete">
+            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+        </form>
+    }
+}
+
+templ OrdersNew() {
+    @layout_views.Base() {
+        <h1 class="text-2xl font-bold">New Order</h1>
+        <form action="/orders" method="post" class="max-w-3xl my-4 flex flex-col space-y-4">
+            <div class="w-full flex flex-col space-y-2">
+                <label for="external_id">External ID</label>
+                <input type="text" id="external_id" name="external_id"/>
+            </div>
+             <div class="w-full flex flex-col space-y-2">
+                <label for="user_id">User ID</label>
+                <input type="text" id="user_id" name="user_id"/>
+            </div>
+             <div class="w-full flex flex-col space-y-2">
+                <label for="status">Status</label>
+                <input type="text" id="status" name="status"/>
+            </div>
+            <div class="w-full flex flex-col space-y-2">
+                <label for="product_id">Product ID</label>
+                <input type="text" id="product_id" name="product_id"/>
+            </div>
+             <div class="w-full flex flex-col space-y-2">
+                <label for="price_amount">Price Amount</label>
+                <input type="text" id="price_amount" name="price_amount"/>
+            </div>
+             <div class="w-full flex flex-col space-y-2">
+                <label for="price_currency">Price Currency</label>
+                <input type="text" id="price_currency" name="price_currency"/>
+            </div>
+            <div class="w-full flex flex-col space-y-2">
+                <label for="invoice_url">Invoice URL</label>
+                <input type="text" id="invoice_url" name="invoice_url"/>
+            </div>
+            <div class="w-full flex flex-col space-y-2">
+                <input type="submit" value="Create Order" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" />
+            </div>
+        </form>
+    }
+}
+
+templ OrdersEdit(order models.Order) {
+    @layout_views.Base() {
+        <h1>Edit Order</h1>
+        <form action={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) } method="post">
+            <input type="hidden" name="_method" value="put"/>
+            <div>
+                <label for="external_id">External ID</label>
+                <input type="text" id="external_id" name="external_id" value={ order.ExternalId }/>
+            </div>
+            <div>
+                <label for="user_id">User ID</label>
+                <input type="text" id="user_id" name="user_id" value={ strconv.Itoa(int(order.UserId)) }/>
+            </div>
+            <div>
+                <label for="status">Status</label>
+                <input type="text" id="status" name="status" value={ string(order.Status) }/>
+            </div>
+            <div>
+                <label for="product_id">Product ID</label>
+                <input type="text" id="product_id" name="product_id" value={ strconv.Itoa(int(order.ProductId)) }/>
+            </div>
+            <div>
+                <label for="price_amount">Price Amount</label>
+                <input type="text" id="price_amount" name="price_amount" value={ strconv.FormatFloat(order.PriceAmount, 'f', 2, 64) }/>
+            </div>
+            <div>
+                <label for="price_currency">Price Currency</label>
+                <input type="text" id="price_currency" name="price_currency" value={ order.PriceCurrency }/>
+            </div>
+            <div>
+                <label for="invoice_url">Invoice URL</label>
+                <input type="text" id="invoice_url" name="invoice_url" value={ order.InvoiceUrl }/>
+            </div>
+            <div>
+                <input type="submit" value="Update Order"/>
+            </div>
+        </form>
     }
 }
