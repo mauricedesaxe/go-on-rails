@@ -21,6 +21,7 @@ type OrdersController struct {
 func (ctrl *OrdersController) RegisterRoutes(app *fiber.App) {
 	app.Get("/orders", ctrl.index)
 	app.Get("/orders/new", ctrl.new)
+	app.Post("/orders/validate", ctrl.validate)
 	app.Post("/orders", ctrl.create)
 	app.Get("/orders/:id", ctrl.show)
 	app.Get("/orders/:id/edit", ctrl.edit)
@@ -232,6 +233,83 @@ func (ctrl *OrdersController) update(ctx *fiber.Ctx) error {
 
 	// redirect to the updated order
 	return ctx.Redirect("/orders/" + strconv.Itoa(int(order.ID)))
+}
+
+// GET /orders/validate - validate - Validate an order & return a partial view
+func (ctrl *OrdersController) validate(ctx *fiber.Ctx) error {
+	// check if user is logged in
+	userId, err := GetUserFromSession(ctx, ctrl.SessionStore)
+	if err != nil {
+		return RenderTempl(ctx, common_views.ErrorAlert("You must be logged in to validate orders"))
+	}
+
+	// get user from db & check if admin
+	var user model.User
+	user.ID = userId
+	err = user.Read(ctrl.Database)
+	if err != nil {
+		return RenderTempl(ctx, common_views.ErrorAlert("You must be logged in to validate orders"))
+	}
+
+	// validate user id
+	userIdStr := ctx.FormValue("user_id")
+	if userIdStr != "" {
+		var userToCheck model.User
+		userIdInt, err := strconv.Atoi(userIdStr)
+		if err != nil {
+			return RenderTempl(ctx, common_views.ErrorAlert("Invalid user ID"))
+		}
+		userToCheck.ID = uint(userIdInt)
+		err = userToCheck.Read(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, common_views.ErrorAlert("User not found"))
+		}
+	}
+
+	// validate status
+	status := ctx.FormValue("status")
+	if status != "" {
+		s := model.OrderStatus(status)
+		switch s {
+		case model.Waiting, model.Confirming, model.Confirmed, model.Sending, model.PartiallyPaid, model.Finished, model.Failed, model.Expired:
+			// Status is valid
+		default:
+			return RenderTempl(ctx, common_views.ErrorAlert("Invalid order status"))
+		}
+	}
+
+	// validate price currency
+	priceCurrency := ctx.FormValue("price_currency")
+	if priceCurrency != "" {
+		if priceCurrency != "usd" {
+			return RenderTempl(ctx, common_views.ErrorAlert("Invalid price currency"))
+		}
+	}
+
+	// validate invoice URL
+	invoiceUrl := ctx.FormValue("invoice_url")
+	if invoiceUrl != "" {
+		if invoiceUrl[:29] != "https://api.nowpayments.io/" {
+			return RenderTempl(ctx, common_views.ErrorAlert("Invalid invoice URL"))
+		}
+	}
+
+	// validate product id
+	productIdStr := ctx.FormValue("product_id")
+	if productIdStr != "" {
+		var productToCheck model.Product
+		productIdInt, err := strconv.Atoi(productIdStr)
+		if err != nil {
+			return RenderTempl(ctx, common_views.ErrorAlert("Invalid product ID"))
+		}
+		productToCheck.ID = uint(productIdInt)
+		err = productToCheck.Read(ctrl.Database)
+		if err != nil {
+			return RenderTempl(ctx, common_views.ErrorAlert("Product not found"))
+		}
+	}
+
+	return RenderTempl(ctx, common_views.InfoAlert("Order seems valid"))
 }
 
 // DELETE /orders/:id - destroy - Delete an order

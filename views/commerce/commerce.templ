@@ -66,21 +66,23 @@ templ OrdersNew() {
     @layout_views.Base() {
         <h1 class="text-2xl font-bold">New Order</h1>
         <form action="/orders" method="post" class="max-w-3xl my-4 flex flex-col space-y-4">
+            <div id="order_validation"></div>
+
             <div class="w-full flex flex-col space-y-2">
                 <label for="external_id">External ID</label>
                 <input type="text" id="external_id" name="external_id"/>
             </div>
              <div class="w-full flex flex-col space-y-2">
                 <label for="user_id">User ID</label>
-                <input type="text" id="user_id" name="user_id"/>
+                <input type="text" id="user_id" name="user_id" hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='user_id']"/>
             </div>
              <div class="w-full flex flex-col space-y-2">
                 <label for="status">Status</label>
-                <input type="text" id="status" name="status"/>
+                <input type="text" id="status" name="status" hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='status']"/>
             </div>
             <div class="w-full flex flex-col space-y-2">
                 <label for="product_id">Product ID</label>
-                <input type="text" id="product_id" name="product_id"/>
+                <input type="text" id="product_id" name="product_id" hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='product_id']"/>
             </div>
              <div class="w-full flex flex-col space-y-2">
                 <label for="price_amount">Price Amount</label>
@@ -88,11 +90,11 @@ templ OrdersNew() {
             </div>
              <div class="w-full flex flex-col space-y-2">
                 <label for="price_currency">Price Currency</label>
-                <input type="text" id="price_currency" name="price_currency"/>
+                <input type="text" id="price_currency" name="price_currency" hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='price_currency']"/>
             </div>
             <div class="w-full flex flex-col space-y-2">
                 <label for="invoice_url">Invoice URL</label>
-                <input type="text" id="invoice_url" name="invoice_url"/>
+                <input type="text" id="invoice_url" name="invoice_url" hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='invoice_url']"/>
             </div>
             <div class="w-full flex flex-col space-y-2">
                 <input type="submit" value="Create Order" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" />
@@ -105,6 +107,8 @@ templ OrdersEdit(order models.Order) {
     @layout_views.Base() {
         <h1>Edit Order</h1>
         <form action={ templ.URL("/orders/" + strconv.Itoa(int(order.ID))) } method="post">
+            <div id="order_validation"></div>
+
             <input type="hidden" name="_method" value="put"/>
             <div>
                 <label for="external_id">External ID</label>
@@ -112,15 +116,15 @@ templ OrdersEdit(order models.Order) {
             </div>
             <div>
                 <label for="user_id">User ID</label>
-                <input type="text" id="user_id" name="user_id" value={ strconv.Itoa(int(order.UserId)) }/>
+                <input type="text" id="user_id" name="user_id" value={ strconv.Itoa(int(order.UserId)) } hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='user_id']"/>
             </div>
             <div>
                 <label for="status">Status</label>
-                <input type="text" id="status" name="status" value={ string(order.Status) }/>
+                <input type="text" id="status" name="status" value={ string(order.Status) } hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='status']"/>
             </div>
             <div>
                 <label for="product_id">Product ID</label>
-                <input type="text" id="product_id" name="product_id" value={ strconv.Itoa(int(order.ProductId)) }/>
+                <input type="text" id="product_id" name="product_id" value={ strconv.Itoa(int(order.ProductId)) } hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='product_id']"/>
             </div>
             <div>
                 <label for="price_amount">Price Amount</label>
@@ -128,11 +132,11 @@ templ OrdersEdit(order models.Order) {
             </div>
             <div>
                 <label for="price_currency">Price Currency</label>
-                <input type="text" id="price_currency" name="price_currency" value={ order.PriceCurrency }/>
+                <input type="text" id="price_currency" name="price_currency" value={ order.PriceCurrency } hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='price_currency']"/>
             </div>
             <div>
                 <label for="invoice_url">Invoice URL</label>
-                <input type="text" id="invoice_url" name="invoice_url" value={ order.InvoiceUrl }/>
+                <input type="text" id="invoice_url" name="invoice_url" value={ order.InvoiceUrl } hx-post="/orders/validate" hx-trigger="change" hx-target="#order_validation" hx-include="[name='invoice_url']"/>
             </div>
             <div>
                 <input type="submit" value="Update Order"/>
